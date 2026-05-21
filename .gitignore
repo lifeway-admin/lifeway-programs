@@ -1,0 +1,35 @@
+CLAUDE.md
+
+# Environment & secrets
+.env
+*.env
+crm/backend/google_credentials.json
+crm/backend/google_token.json
+
+# Database
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+venv/
+.venv/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Site mirror (large, regeneratable)
+site_mirror/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+/tmp/

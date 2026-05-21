@@ -1,0 +1,880 @@
+import { useState, useEffect, useRef } from 'react'
+import { format, addDays, isSunday, parseISO } from 'date-fns'
+import api from './api'
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function HeartIcon() {
+  return (
+    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+    </svg>
+  )
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg className="w-20 h-20 text-lifeway-pink mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  )
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+  )
+}
+
+// ── Service icon mapper ────────────────────────────────────────────────────────
+
+const SERVICE_EMOJIS = {
+  brain: '🧠', 'heart-pulse': '💊', users: '🤝',
+  sun: '🌟', briefcase: '💼', apple: '🍎', activity: '✨',
+}
+
+// ── Step Indicator ─────────────────────────────────────────────────────────────
+
+function StepIndicator({ currentStep }) {
+  const steps = ['Your Info', 'Service', 'Provider', 'Date & Time', 'Consent']
+  return (
+    <div className="flex items-center justify-center gap-0 mb-8">
+      {steps.map((label, idx) => {
+        const stepNum = idx + 1
+        const isCompleted = currentStep > stepNum
+        const isCurrent = currentStep === stepNum
+        return (
+          <div key={stepNum} className="flex items-center">
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all
+                ${isCompleted ? 'bg-lifeway-pink border-lifeway-pink text-white' : ''}
+                ${isCurrent ? 'bg-white border-lifeway-pink text-lifeway-pink' : ''}
+                ${!isCompleted && !isCurrent ? 'bg-white border-gray-300 text-gray-400' : ''}
+              `}>
+                {isCompleted ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : stepNum}
+              </div>
+              <span className={`text-xs mt-1 font-medium hidden sm:block ${isCurrent ? 'text-lifeway-pink' : 'text-gray-400'}`}>
+                {label}
+              </span>
+            </div>
+            {idx < steps.length - 1 && (
+              <div className={`h-0.5 w-10 sm:w-14 mx-1 mt-0 sm:-mt-4 transition-all ${isCompleted ? 'bg-lifeway-pink' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Step 1: Personal Information ───────────────────────────────────────────────
+
+function InfoStep({ onNext }) {
+  const [form, setForm] = useState({
+    first_name: '', last_name: '', email: '', phone: '',
+    date_of_birth: '', insurance: '', notes: '',
+  })
+  const [errors, setErrors] = useState({})
+
+  const set = (field, val) => setForm(f => ({ ...f, [field]: val }))
+
+  const validate = () => {
+    const e = {}
+    if (!form.first_name.trim()) e.first_name = 'Required'
+    if (!form.last_name.trim()) e.last_name = 'Required'
+    if (!form.email.trim()) e.email = 'Required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email'
+    if (!form.phone.trim()) e.phone = 'Required'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const handleNext = (e) => {
+    e.preventDefault()
+    if (validate()) onNext(form)
+  }
+
+  const inputClass = (field) =>
+    `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lifeway-pink focus:border-transparent transition-all
+    ${errors[field] ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`
+
+  return (
+    <form onSubmit={handleNext} className="space-y-5">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">Your Information</h2>
+        <p className="text-gray-500 text-sm">Tell us a bit about yourself to get started.</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">First Name *</label>
+          <input className={inputClass('first_name')} value={form.first_name} onChange={e => set('first_name', e.target.value)} placeholder="Jane" />
+          {errors.first_name && <p className="text-xs text-red-500 mt-1">{errors.first_name}</p>}
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Last Name *</label>
+          <input className={inputClass('last_name')} value={form.last_name} onChange={e => set('last_name', e.target.value)} placeholder="Doe" />
+          {errors.last_name && <p className="text-xs text-red-500 mt-1">{errors.last_name}</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Email *</label>
+          <input type="email" className={inputClass('email')} value={form.email} onChange={e => set('email', e.target.value)} placeholder="jane@example.com" />
+          {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Phone *</label>
+          <input type="tel" className={inputClass('phone')} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="305-555-1234" />
+          {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Date of Birth</label>
+          <input type="date" className={inputClass('date_of_birth')} value={form.date_of_birth} onChange={e => set('date_of_birth', e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Insurance</label>
+          <input className={inputClass('insurance')} value={form.insurance} onChange={e => set('insurance', e.target.value)} placeholder="Medicaid, Medicare, None..." />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">Notes / Reason for Visit</label>
+        <textarea
+          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lifeway-pink focus:border-transparent resize-none"
+          rows={3}
+          value={form.notes}
+          onChange={e => set('notes', e.target.value)}
+          placeholder="Share any details that will help us prepare for your visit..."
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-3 bg-lifeway-pink hover:bg-lifeway-darkpink text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+      >
+        Continue
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </form>
+  )
+}
+
+// ── Step 2: Choose Service ─────────────────────────────────────────────────────
+
+function ServiceStep({ services, onSelect }) {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">What can we help you with?</h2>
+      <p className="text-gray-500 text-center mb-8">Select the service you're looking for</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {services.map((svc) => (
+          <button
+            key={svc.id}
+            onClick={() => onSelect(svc)}
+            className="flex flex-col items-center p-5 rounded-xl border-2 border-gray-200 hover:border-lifeway-pink hover:shadow-md cursor-pointer transition-all bg-white text-left group"
+          >
+            <div className="w-12 h-12 rounded-full bg-lifeway-light flex items-center justify-center text-2xl mb-3 group-hover:bg-lifeway-pink group-hover:text-white transition-colors">
+              {SERVICE_EMOJIS[svc.icon] || '✦'}
+            </div>
+            <span className="font-semibold text-gray-900 text-sm text-center">{svc.label}</span>
+            <span className="text-xs text-gray-500 text-center mt-1 leading-snug">{svc.description}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Step 3: Choose Provider ────────────────────────────────────────────────────
+
+function ProviderStep({ providers, selectedService, onSelect }) {
+  const colors = ['bg-pink-100 text-pink-700', 'bg-purple-100 text-purple-700', 'bg-blue-100 text-blue-700', 'bg-green-100 text-green-700', 'bg-orange-100 text-orange-700']
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Choose a Provider</h2>
+      <p className="text-gray-500 text-center mb-8">{selectedService?.label} providers available</p>
+      <div className="space-y-3">
+        <button
+          onClick={() => onSelect(null)}
+          className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-lifeway-pink hover:shadow-md cursor-pointer transition-all bg-white"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xl font-bold flex-shrink-0">?</div>
+          <div className="text-left">
+            <div className="font-semibold text-gray-900">Any Available Provider</div>
+            <div className="text-sm text-gray-500">We'll assign the best available provider for you</div>
+          </div>
+        </button>
+        {providers.length === 0 && (
+          <div className="text-center py-8 text-gray-400">
+            <p>No specific providers found for this service.</p>
+            <p className="text-sm mt-1">Please select "Any Available Provider".</p>
+          </div>
+        )}
+        {providers.map((p, idx) => {
+          const initials = `${p.first_name[0]}${p.last_name[0]}`.toUpperCase()
+          const colorClass = colors[idx % colors.length]
+          return (
+            <button
+              key={p.id}
+              onClick={() => onSelect(p)}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-lifeway-pink hover:shadow-md cursor-pointer transition-all bg-white"
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${colorClass}`}>{initials}</div>
+              <div className="text-left flex-1">
+                <div className="font-semibold text-gray-900">{p.title ? `${p.title} ` : ''}{p.first_name} {p.last_name}</div>
+                <div className="text-xs text-lifeway-pink font-medium capitalize">{p.role.replace('_', ' ')}</div>
+                {p.bio && <div className="text-sm text-gray-500 mt-1 line-clamp-2">{p.bio}</div>}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Step 4: Choose Date & Time ─────────────────────────────────────────────────
+
+function DateTimeStep({ selectedProvider, onSelect }) {
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [slots, setSlots] = useState([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+  const today = new Date()
+  const dates = Array.from({ length: 14 }, (_, i) => addDays(today, i)).filter(d => !isSunday(d))
+
+  const handleDateSelect = async (d) => {
+    setSelectedDate(d)
+    setSlots([])
+    if (!selectedProvider) return
+    setLoadingSlots(true)
+    try {
+      const dateStr = format(d, 'yyyy-MM-dd')
+      const resp = await api.get(`/public/slots?staff_id=${selectedProvider.id}&date=${dateStr}`)
+      setSlots(resp.data)
+    } catch {}
+    finally { setLoadingSlots(false) }
+  }
+
+  const handleSlotSelect = (slot) => {
+    if (!slot.available) return
+    onSelect({ date: selectedDate, slot })
+  }
+
+  const formatSlotTime = (timeStr) => {
+    const [h] = timeStr.split(':')
+    const hour = parseInt(h)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
+    return `${displayHour}:00 ${ampm}`
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Pick a Date & Time</h2>
+      <p className="text-gray-500 text-center mb-6">Select a convenient appointment time</p>
+
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Available Dates</h3>
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+          {dates.map((d) => {
+            const isSelected = selectedDate && format(d, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+            return (
+              <button
+                key={d.toISOString()}
+                onClick={() => handleDateSelect(d)}
+                className={`flex flex-col items-center py-2.5 px-1 rounded-lg border-2 transition-all cursor-pointer
+                  ${isSelected ? 'bg-lifeway-pink border-lifeway-pink text-white' : 'border-gray-200 hover:border-lifeway-pink text-gray-700 bg-white'}`}
+              >
+                <span className="text-xs font-medium">{format(d, 'EEE')}</span>
+                <span className="text-lg font-bold">{format(d, 'd')}</span>
+                <span className="text-xs">{format(d, 'MMM')}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {selectedDate && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            Available Times — {format(selectedDate, 'EEEE, MMMM d')}
+          </h3>
+          {!selectedProvider && (
+            <p className="text-sm text-amber-600 bg-amber-50 rounded-lg p-3 mb-3">
+              You selected "Any available provider". Times shown are general slots — a provider will be assigned at booking.
+            </p>
+          )}
+          {loadingSlots ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lifeway-pink" />
+            </div>
+          ) : selectedProvider && slots.length > 0 ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {slots.map((slot) => (
+                <button
+                  key={slot.time}
+                  onClick={() => handleSlotSelect(slot)}
+                  disabled={!slot.available}
+                  className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all
+                    ${slot.available
+                      ? 'border-gray-200 hover:border-lifeway-pink hover:bg-lifeway-light text-gray-800 cursor-pointer'
+                      : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'}`}
+                >
+                  {formatSlotTime(slot.time)}
+                </button>
+              ))}
+            </div>
+          ) : selectedProvider ? (
+            <p className="text-center text-gray-400 py-6">No slots available for this date.</p>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {Array.from({ length: 9 }, (_, i) => {
+                const hour = 8 + i
+                const ampm = hour >= 12 ? 'PM' : 'AM'
+                const displayHour = hour > 12 ? hour - 12 : hour
+                const timeStr = `${String(hour).padStart(2, '0')}:00`
+                const datetimeStr = `${format(selectedDate, 'yyyy-MM-dd')}T${timeStr}:00`
+                return (
+                  <button
+                    key={timeStr}
+                    onClick={() => onSelect({ date: selectedDate, slot: { time: timeStr, datetime: datetimeStr, available: true } })}
+                    className="py-2.5 px-3 rounded-lg border-2 border-gray-200 hover:border-lifeway-pink hover:bg-lifeway-light text-sm font-medium text-gray-800 cursor-pointer transition-all"
+                  >
+                    {displayHour}:00 {ampm}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Consent Modal ──────────────────────────────────────────────────────────────
+
+function ConsentModal({ onSign, onClose }) {
+  const [scrolledToBottom, setScrolledToBottom] = useState(false)
+  const [agreed, setAgreed] = useState(false)
+  const [signature, setSignature] = useState('')
+  const bodyRef = useRef(null)
+
+  function handleScroll() {
+    const el = bodyRef.current
+    if (!el) return
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      setScrolledToBottom(true)
+    }
+  }
+
+  const canSign = scrolledToBottom && agreed && signature.trim().length >= 2
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Patient Consent Forms</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Please read carefully and scroll to the bottom to sign</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+
+        {/* Scroll progress hint */}
+        {!scrolledToBottom && (
+          <div className="bg-amber-50 border-b border-amber-200 px-6 py-2 flex-shrink-0">
+            <p className="text-xs text-amber-700 font-medium">↓ Scroll to the bottom to unlock the signature field</p>
+          </div>
+        )}
+
+        {/* Consent body */}
+        <div
+          ref={bodyRef}
+          onScroll={handleScroll}
+          className="overflow-y-auto flex-1 px-6 py-5 text-sm text-gray-700 space-y-5 leading-relaxed"
+        >
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">1. Consent for Services</h3>
+            <p>By completing this booking, I voluntarily request and consent to receive services from Lifeway Programs, Inc., a nonprofit mental health and community wellness organization. I understand that services may include individual counseling, family therapy, group therapy, case management, psychiatric evaluation, substance abuse counseling, and other related support services as recommended by my assigned provider.</p>
+            <p className="mt-2">I understand that my participation in services is voluntary and that I may withdraw my consent at any time. I acknowledge that no specific outcomes can be guaranteed, and that treatment goals will be discussed and agreed upon with my provider.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">2. HIPAA Notice of Privacy Practices</h3>
+            <p>Lifeway Programs is committed to protecting the privacy of your health information in compliance with the Health Insurance Portability and Accountability Act (HIPAA). Your protected health information (PHI) may be used and disclosed for the purposes of treatment, payment, and healthcare operations without additional authorization.</p>
+            <p className="mt-2">Lifeway Programs will not sell, rent, or share your personal health information with third parties for marketing purposes. Disclosures outside of treatment, payment, and operations will require your written authorization, except as permitted or required by law, including but not limited to:</p>
+            <ul className="list-disc ml-5 mt-1 space-y-1">
+              <li>Mandatory reporting of suspected child abuse, elder abuse, or abuse of a dependent adult</li>
+              <li>Situations involving imminent risk of harm to yourself or others</li>
+              <li>Valid court orders or legal subpoenas</li>
+              <li>Public health reporting as required by state or federal law</li>
+            </ul>
+            <p className="mt-2">You have the right to access your records, request corrections, receive an accounting of disclosures, and obtain a paper copy of our full Notice of Privacy Practices at any time by contacting our office.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">3. Confidentiality and Its Limits</h3>
+            <p>Information shared during your sessions is confidential. Your provider will not disclose information to outside parties without your written consent except in the following circumstances:</p>
+            <ul className="list-disc ml-5 mt-1 space-y-1">
+              <li><strong>Risk of harm:</strong> If you disclose intent to harm yourself or another person, your provider is legally and ethically required to take protective action, which may include notifying emergency services or appropriate individuals.</li>
+              <li><strong>Abuse or neglect:</strong> Providers are mandated reporters and must report known or suspected abuse or neglect of a minor, elderly person, or vulnerable adult to the appropriate authorities.</li>
+              <li><strong>Legal proceedings:</strong> If you are involved in a court proceeding and the court orders disclosure, your provider may be required to provide records or testimony.</li>
+              <li><strong>Supervision and consultation:</strong> Your provider may consult with clinical supervisors or colleagues for the purpose of quality care. These consultations are conducted confidentially.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">4. Financial Responsibility</h3>
+            <p>I understand that I am responsible for any fees associated with services received at Lifeway Programs. Lifeway Programs offers services on a sliding-scale fee basis based on household income and family size. I agree to discuss payment arrangements, sliding-scale eligibility, and insurance billing with administrative staff prior to or at my first appointment.</p>
+            <p className="mt-2">I understand that failure to address outstanding balances may affect my ability to schedule future appointments. Lifeway Programs accepts Medicaid, Medicare, and select private insurance plans. Uninsured individuals may qualify for reduced-fee services through our community assistance fund.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">5. Cancellation and No-Show Policy</h3>
+            <p>I understand that my scheduled appointment time is reserved specifically for me. If I am unable to attend, I agree to notify Lifeway Programs at least <strong>24 hours in advance</strong> so that the time may be offered to another person in need of services.</p>
+            <p className="mt-2">Repeated cancellations without adequate notice or habitual no-shows may result in a temporary hold on scheduling or a requirement to re-engage through the intake process. We understand emergencies happen and will work with clients on a case-by-case basis.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">6. Emergency Procedures</h3>
+            <p>In the event of a psychiatric or medical emergency during a session or on the premises, Lifeway Programs staff are authorized to contact emergency services (911) on your behalf. I authorize Lifeway Programs to contact my designated emergency contact in the event of a safety concern or medical emergency where I am unable to communicate on my own behalf.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">7. Telehealth Services</h3>
+            <p>If your services are delivered via telehealth (video or phone), you consent to receive services in this format and understand that telehealth is not appropriate for all clinical situations. Your provider will use HIPAA-compliant technology platforms. You agree to participate from a private, secure location and to notify your provider if a third party is present during the session.</p>
+          </section>
+
+          <section>
+            <h3 className="font-bold text-gray-900 text-base mb-2">8. Acknowledgment</h3>
+            <p>I confirm that I have read and understood the above consent forms, or that they have been explained to me in a language I understand. I have had the opportunity to ask questions. By signing below, I voluntarily agree to the terms outlined in this document and authorize Lifeway Programs to provide the services described.</p>
+            <p className="mt-2 text-xs text-gray-500">This consent remains in effect for the duration of my services at Lifeway Programs unless revoked in writing. A copy of this consent is available upon request.</p>
+          </section>
+        </div>
+
+        {/* Signature area */}
+        <div className="border-t border-gray-200 px-6 py-4 space-y-3 flex-shrink-0 bg-gray-50 rounded-b-2xl">
+          <label className={`flex items-start gap-3 cursor-pointer ${!scrolledToBottom ? 'opacity-40 pointer-events-none' : ''}`}>
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={e => setAgreed(e.target.checked)}
+              className="mt-0.5 rounded border-gray-300 text-lifeway-pink focus:ring-lifeway-pink"
+            />
+            <span className="text-sm text-gray-700 leading-snug">
+              I have read, understood, and agree to all of the above consent forms.
+            </span>
+          </label>
+
+          <div className={!scrolledToBottom ? 'opacity-40 pointer-events-none' : ''}>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
+              Type your full legal name as your electronic signature *
+            </label>
+            <input
+              type="text"
+              value={signature}
+              onChange={e => setSignature(e.target.value)}
+              placeholder="Your full name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lifeway-pink font-medium italic"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg text-sm hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={!canSign}
+              onClick={() => onSign(signature.trim())}
+              className="flex-1 py-2.5 bg-lifeway-pink text-white font-semibold rounded-lg text-sm hover:bg-lifeway-darkpink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              I Agree & Sign
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Step 5: Review & Consent ───────────────────────────────────────────────────
+
+function ConsentStep({ form, selectedService, selectedProvider, selectedSlot, onConfirm, loading }) {
+  const [showConsentModal, setShowConsentModal] = useState(false)
+  const [consentSignature, setConsentSignature] = useState(null)
+
+  const formatDateTime = (slot) => {
+    if (!slot) return ''
+    try { return format(parseISO(slot.slot.datetime), "EEEE, MMMM d, yyyy 'at' h:mm a") }
+    catch { return slot.slot.datetime }
+  }
+
+  function handleSign(signature) {
+    setConsentSignature(signature)
+    setShowConsentModal(false)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">Review & Consent</h2>
+        <p className="text-gray-500 text-sm">Confirm your booking details and sign the required consent forms.</p>
+      </div>
+
+      {/* Booking summary */}
+      <div className="bg-lifeway-light border border-pink-100 rounded-xl p-5">
+        <h3 className="font-semibold text-lifeway-darkpink mb-4 text-sm uppercase tracking-wide">Booking Summary</h3>
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Name</span>
+            <span className="font-semibold text-gray-900">{form.first_name} {form.last_name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Email</span>
+            <span className="font-semibold text-gray-900">{form.email}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Phone</span>
+            <span className="font-semibold text-gray-900">{form.phone}</span>
+          </div>
+          {selectedService && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Service</span>
+              <span className="font-semibold text-gray-900">{selectedService.label}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-500">Provider</span>
+            <span className="font-semibold text-gray-900">
+              {selectedProvider
+                ? `${selectedProvider.title ? selectedProvider.title + ' ' : ''}${selectedProvider.first_name} ${selectedProvider.last_name}`
+                : 'Any Available'}
+            </span>
+          </div>
+          {selectedSlot && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Date & Time</span>
+              <span className="font-semibold text-gray-900 text-right ml-4">{formatDateTime(selectedSlot)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Consent section */}
+      <div className={`rounded-xl border-2 p-5 transition-all ${consentSignature ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-white'}`}>
+        <div className="flex items-start gap-4">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${consentSignature ? 'bg-green-100' : 'bg-gray-100'}`}>
+            {consentSignature ? (
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            )}
+          </div>
+          <div className="flex-1">
+            {consentSignature ? (
+              <div>
+                <p className="font-semibold text-green-800 text-sm">Consent Forms Signed</p>
+                <p className="text-xs text-green-700 mt-0.5">Signed by: <span className="italic font-medium">{consentSignature}</span></p>
+                <button
+                  onClick={() => setShowConsentModal(true)}
+                  className="text-xs text-green-700 underline mt-1 hover:text-green-900"
+                >
+                  Review again
+                </button>
+              </div>
+            ) : (
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">Patient Consent Forms Required</p>
+                <p className="text-xs text-gray-500 mt-0.5 mb-3">You must read and sign our consent forms before confirming your appointment.</p>
+                <button
+                  onClick={() => setShowConsentModal(true)}
+                  className="px-4 py-2 bg-lifeway-pink text-white text-sm font-semibold rounded-lg hover:bg-lifeway-darkpink transition-colors"
+                >
+                  View & Sign Consent Forms →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Confirm button */}
+      <button
+        onClick={onConfirm}
+        disabled={!consentSignature || loading}
+        className="w-full py-3.5 bg-lifeway-pink hover:bg-lifeway-darkpink text-white font-semibold rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+      >
+        {loading ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+            Confirming...
+          </>
+        ) : (
+          <>
+            {!consentSignature && <span className="text-xs opacity-80">Sign consent forms above to continue</span>}
+            {consentSignature && 'Confirm Booking'}
+          </>
+        )}
+      </button>
+
+      {showConsentModal && (
+        <ConsentModal onSign={handleSign} onClose={() => setShowConsentModal(false)} />
+      )}
+    </div>
+  )
+}
+
+// ── Step 6: Confirmation ───────────────────────────────────────────────────────
+
+function ConfirmationStep({ confirmation, selectedService, selectedProvider, selectedSlot, form, onReset }) {
+  const formatDateTime = (slot) => {
+    if (!slot) return ''
+    try { return format(parseISO(slot.slot.datetime), "EEEE, MMMM d, yyyy 'at' h:mm a") }
+    catch { return slot.slot.datetime }
+  }
+
+  return (
+    <div className="text-center max-w-lg mx-auto">
+      <div className="mb-6"><CheckCircleIcon /></div>
+      <h2 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
+      <p className="text-gray-500 mb-6">Your appointment has been successfully scheduled.</p>
+
+      <div className="bg-lifeway-light border border-pink-200 rounded-xl p-5 mb-6 text-left">
+        <div className="text-center mb-4">
+          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Confirmation Number</p>
+          <p className="text-2xl font-bold text-lifeway-pink tracking-widest mt-1">{confirmation?.confirmation_number}</p>
+        </div>
+        <hr className="border-pink-200 mb-4" />
+        <div className="space-y-2.5 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500">Name</span>
+            <span className="font-semibold text-gray-900">{form.first_name} {form.last_name}</span>
+          </div>
+          {selectedService && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Service</span>
+              <span className="font-semibold text-gray-900">{selectedService.label}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-500">Provider</span>
+            <span className="font-semibold text-gray-900">
+              {selectedProvider
+                ? `${selectedProvider.title ? selectedProvider.title + ' ' : ''}${selectedProvider.first_name} ${selectedProvider.last_name}`
+                : 'To Be Assigned'}
+            </span>
+          </div>
+          {selectedSlot && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Date & Time</span>
+              <span className="font-semibold text-gray-900 text-right ml-4">{formatDateTime(selectedSlot)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-sm text-gray-500 mb-6">
+        We'll see you soon! If you need to reschedule, call us or visit{' '}
+        <a href="https://lifewayprograms.org" className="text-lifeway-pink font-medium hover:underline" target="_blank" rel="noreferrer">
+          lifewayprograms.org
+        </a>
+      </p>
+
+      <button
+        onClick={onReset}
+        className="w-full py-3 bg-lifeway-pink hover:bg-lifeway-darkpink text-white font-semibold rounded-lg transition-colors"
+      >
+        Book Another Appointment
+      </button>
+    </div>
+  )
+}
+
+// ── Main App ───────────────────────────────────────────────────────────────────
+
+export default function App() {
+  const [step, setStep] = useState(1)
+  const [services, setServices] = useState([])
+  const [providers, setProviders] = useState([])
+  const [bookingForm, setBookingForm] = useState(null)
+  const [selectedService, setSelectedService] = useState(null)
+  const [selectedProvider, setSelectedProvider] = useState(null)
+  const [selectedSlot, setSelectedSlot] = useState(null)
+  const [confirmation, setConfirmation] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    api.get('/public/services').then(r => setServices(r.data)).catch(console.error)
+  }, [])
+
+  useEffect(() => {
+    if (selectedService) {
+      api.get(`/public/providers?service=${selectedService.id}`)
+        .then(r => setProviders(r.data))
+        .catch(console.error)
+    }
+  }, [selectedService])
+
+  // Step 1 → 2
+  const handleInfoNext = (form) => {
+    setBookingForm(form)
+    setStep(2)
+  }
+
+  // Step 2 → 3
+  const handleServiceSelect = (svc) => {
+    setSelectedService(svc)
+    setSelectedProvider(null)
+    setSelectedSlot(null)
+    setStep(3)
+  }
+
+  // Step 3 → 4
+  const handleProviderSelect = (provider) => {
+    setSelectedProvider(provider)
+    setSelectedSlot(null)
+    setStep(4)
+  }
+
+  // Step 4 → 5
+  const handleSlotSelect = ({ date, slot }) => {
+    setSelectedSlot({ date, slot })
+    setStep(5)
+  }
+
+  // Step 5 → 6 (actual booking)
+  const handleConfirm = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const payload = {
+        first_name: bookingForm.first_name,
+        last_name: bookingForm.last_name,
+        email: bookingForm.email,
+        phone: bookingForm.phone,
+        date_of_birth: bookingForm.date_of_birth || null,
+        insurance: bookingForm.insurance || null,
+        service: selectedService?.id,
+        staff_id: selectedProvider?.id || null,
+        appointment_datetime: selectedSlot?.slot?.datetime,
+        notes: bookingForm.notes || null,
+      }
+      const resp = await api.post('/public/book', payload)
+      setConfirmation(resp.data)
+      setStep(6)
+    } catch (e) {
+      setError(e?.response?.data?.detail || 'Booking failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleReset = () => {
+    setStep(1)
+    setBookingForm(null)
+    setSelectedService(null)
+    setSelectedProvider(null)
+    setSelectedSlot(null)
+    setConfirmation(null)
+    setError(null)
+  }
+
+  const handleBack = () => {
+    if (step > 1 && step < 6) setStep(s => s - 1)
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-lifeway-pink shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <HeartIcon />
+          </div>
+          <div>
+            <h1 className="text-white font-bold text-xl leading-none">Lifeway Programs</h1>
+            <p className="text-pink-100 text-sm mt-0.5">Book Your Appointment</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {step < 6 && (
+          <div className="mb-6">
+            <StepIndicator currentStep={step} />
+          </div>
+        )}
+
+        {step > 1 && step < 6 && (
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-1 text-gray-500 hover:text-lifeway-pink mb-4 text-sm font-medium transition-colors"
+          >
+            <ChevronLeftIcon />
+            Back
+          </button>
+        )}
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
+          {step === 1 && <InfoStep onNext={handleInfoNext} />}
+          {step === 2 && <ServiceStep services={services} onSelect={handleServiceSelect} />}
+          {step === 3 && <ProviderStep providers={providers} selectedService={selectedService} onSelect={handleProviderSelect} />}
+          {step === 4 && <DateTimeStep selectedProvider={selectedProvider} onSelect={handleSlotSelect} />}
+          {step === 5 && (
+            <ConsentStep
+              form={bookingForm}
+              selectedService={selectedService}
+              selectedProvider={selectedProvider}
+              selectedSlot={selectedSlot}
+              onConfirm={handleConfirm}
+              loading={loading}
+            />
+          )}
+          {step === 6 && (
+            <ConfirmationStep
+              confirmation={confirmation}
+              selectedService={selectedService}
+              selectedProvider={selectedProvider}
+              selectedSlot={selectedSlot}
+              form={bookingForm}
+              onReset={handleReset}
+            />
+          )}
+        </div>
+
+        <p className="text-center text-xs text-gray-400 mt-6">
+          Lifeway Programs · Compassionate Care for Our Community
+        </p>
+      </main>
+    </div>
+  )
+}
