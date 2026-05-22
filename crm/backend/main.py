@@ -1,14 +1,22 @@
-from fastapi import FastAPI, Depends, HTTPException
+from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 import models, schemas
 from database import engine, get_db, Base
 from auth import authenticate_user, create_access_token, hash_password, get_current_user, auth_router
-from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal
+from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal, docs as docs_router
 from routers.reports import router as reports_router
+from limiter import limiter
+from scheduler import scheduler
 
 Base.metadata.create_all(bind=engine, checkfirst=True)
 
@@ -29,8 +37,54 @@ with engine.connect() as conn:
     if 'recurrence_index' not in _cols:
         conn.execute(text("ALTER TABLE appointments ADD COLUMN recurrence_index INTEGER"))
         conn.commit()
+    if 'confirmation_number' not in _cols:
+        conn.execute(text("ALTER TABLE appointments ADD COLUMN confirmation_number VARCHAR(20)"))
+        conn.commit()
+    if 'reminder_sent' not in _cols:
+        conn.execute(text("ALTER TABLE appointments ADD COLUMN reminder_sent BOOLEAN DEFAULT 0"))
+        conn.commit()
+    if 'is_telehealth' not in _cols:
+        conn.execute(text("ALTER TABLE appointments ADD COLUMN is_telehealth BOOLEAN DEFAULT 0"))
+        conn.commit()
+    if 'zoom_join_url' not in _cols:
+        conn.execute(text("ALTER TABLE appointments ADD COLUMN zoom_join_url VARCHAR(500)"))
+        conn.commit()
+    if 'zoom_meeting_id' not in _cols:
+        conn.execute(text("ALTER TABLE appointments ADD COLUMN zoom_meeting_id VARCHAR(100)"))
+        conn.commit()
+
+with engine.connect() as conn:
+    conn.execute(text(
+        "CREATE UNIQUE INDEX IF NOT EXISTS uix_appointments_confirmation_number "
+        "ON appointments (confirmation_number) WHERE confirmation_number IS NOT NULL"
+    ))
+    conn.commit()
+
+# Migrate staff table — per-therapist Google Calendar fields
+with engine.connect() as conn:
+    _cols = [c['name'] for c in sa_inspect(engine).get_columns('staff')]
+    if 'google_refresh_token' not in _cols:
+        conn.execute(text("ALTER TABLE staff ADD COLUMN google_refresh_token TEXT"))
+        conn.commit()
+    if 'google_calendar_id' not in _cols:
+        conn.execute(text("ALTER TABLE staff ADD COLUMN google_calendar_id VARCHAR(300)"))
+        conn.commit()
 
 app = FastAPI(title="Lifeway Programs CRM", version="1.0.0")
+
+
+@app.on_event("startup")
+def startup():
+    scheduler.start()
+
+
+@app.on_event("shutdown")
+def shutdown():
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +93,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # Prevent browsers from caching PHI returned by API responses
+    if request.url.path.startswith("/clients") or request.url.path.startswith("/appointments"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        response.headers["Pragma"] = "no-cache"
+    return response
 
 app.include_router(public_router.router)
 app.include_router(clients.router)
@@ -51,12 +120,14 @@ app.include_router(activity.router)
 app.include_router(google_cal.router)
 app.include_router(reports_router)
 app.include_router(auth_router)
+app.include_router(docs_router.router)
 
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
 
 @app.post("/auth/login", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
@@ -65,7 +136,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 
 @app.post("/auth/register", response_model=schemas.UserOut, status_code=201)
-def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
     db_user = models.User(

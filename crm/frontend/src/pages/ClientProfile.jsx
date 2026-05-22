@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit2, X, Check, Phone, Mail, MapPin, Shield, Users, User, UserCheck, Tag, FileText, ChevronRight, Printer } from 'lucide-react'
+import { ArrowLeft, Edit2, X, Check, Phone, Mail, MapPin, Shield, Users, User, UserCheck, Tag, FileText, ChevronRight, Printer, CreditCard, Video, ExternalLink, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import api from '../api'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
@@ -110,6 +110,138 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
+const AMOUNT_PRESETS = [2500, 5000, 10000, 15000, 25000]
+
+function PaymentRequestModal({ client, onClose, toast }) {
+  const [amountCents, setAmountCents] = useState('')
+  const [customAmount, setCustomAmount] = useState('')
+  const [description, setDescription] = useState('Service Fee')
+  const [sendEmail, setSendEmail] = useState(true)
+  const [sendSms, setSendSms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+
+  const selectedCents = customAmount
+    ? Math.round(parseFloat(customAmount) * 100)
+    : amountCents
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!selectedCents || selectedCents < 100) {
+      toast('Minimum amount is $1.00', 'error')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await api.post(`/clients/${client.id}/payment-request`, {
+        amount_cents: selectedCents,
+        description,
+        send_email: sendEmail,
+        send_sms: sendSms,
+      })
+      setResult(res.data)
+      toast('Payment request sent!', 'success')
+    } catch (err) {
+      toast(err?.response?.data?.detail || 'Failed to send payment request.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <CreditCard size={18} className="text-lifeway-pink" />
+            <h2 className="font-semibold text-lg text-gray-900 dark:text-white">Send Payment Request</h2>
+          </div>
+          <button onClick={onClose}><X size={20} className="text-gray-400" /></button>
+        </div>
+
+        {result ? (
+          <div className="p-6 space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+              <Check size={24} className="mx-auto text-green-500 mb-2" />
+              <p className="font-semibold text-green-800">Payment request sent!</p>
+              <p className="text-sm text-green-600 mt-1">{result.amount} requested from {client.first_name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Checkout link</p>
+              <a href={result.checkout_url} target="_blank" rel="noreferrer"
+                className="text-sm text-lifeway-pink break-all hover:underline flex items-center gap-1">
+                {result.checkout_url} <ExternalLink size={12} />
+              </a>
+            </div>
+            <button onClick={onClose} className="btn-primary w-full">Done</button>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {AMOUNT_PRESETS.map(cents => (
+                  <button
+                    key={cents}
+                    type="button"
+                    onClick={() => { setAmountCents(cents); setCustomAmount('') }}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                      amountCents === cents && !customAmount
+                        ? 'bg-lifeway-pink text-white border-lifeway-pink'
+                        : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-lifeway-pink'
+                    }`}
+                  >
+                    ${(cents / 100).toFixed(0)}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="Custom amount ($)"
+                className="input"
+                value={customAmount}
+                onChange={e => { setCustomAmount(e.target.value); setAmountCents('') }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <input className="input" value={description} onChange={e => setDescription(e.target.value)} required />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Send via</p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={sendEmail} onChange={e => setSendEmail(e.target.checked)}
+                  disabled={!client.email} className="rounded" />
+                <span className={!client.email ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}>
+                  Email {!client.email && '(no email on file)'}
+                </span>
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="checkbox" checked={sendSms} onChange={e => setSendSms(e.target.checked)}
+                  disabled={!client.phone} className="rounded" />
+                <span className={!client.phone ? 'text-gray-400' : 'text-gray-700 dark:text-gray-300'}>
+                  SMS {!client.phone && '(no phone on file)'}
+                </span>
+              </label>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                {loading ? 'Sending...' : <><CreditCard size={15} /> Send Request</>}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ClientProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -121,8 +253,10 @@ export default function ClientProfile() {
   const [tab, setTab] = useState('appointments')
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
   const [notes, setNotes] = useState('')
   const [notesSaved, setNotesSaved] = useState(false)
+  const [zoomLoading, setZoomLoading] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -168,6 +302,32 @@ export default function ClientProfile() {
     }
   }
 
+  async function createZoom(apptId) {
+    setZoomLoading(apptId)
+    try {
+      await api.post(`/appointments/${apptId}/zoom`)
+      toast('Zoom meeting created.', 'success')
+      load()
+    } catch (err) {
+      toast(err?.response?.data?.detail || 'Failed to create Zoom meeting.', 'error')
+    } finally {
+      setZoomLoading(null)
+    }
+  }
+
+  async function removeZoom(apptId) {
+    setZoomLoading(apptId)
+    try {
+      await api.delete(`/appointments/${apptId}/zoom`)
+      toast('Zoom meeting removed.', 'success')
+      load()
+    } catch {
+      toast('Failed to remove Zoom meeting.', 'error')
+    } finally {
+      setZoomLoading(null)
+    }
+  }
+
   if (loading) return <div className="p-8 text-gray-400">Loading...</div>
   if (!client) return <div className="p-8 text-gray-400">Client not found.</div>
 
@@ -210,6 +370,12 @@ export default function ClientProfile() {
         >
           <Printer size={15} />
           Print
+        </button>
+        <button
+          onClick={() => setShowPayment(true)}
+          className="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors"
+        >
+          <CreditCard size={15} /> Payment Request
         </button>
         <button onClick={() => setShowEdit(true)} className="btn-secondary flex items-center gap-2">
           <Edit2 size={15} /> Edit
@@ -304,8 +470,8 @@ export default function ClientProfile() {
                   <tr>
                     <th className="text-left px-5 py-3 text-gray-500 dark:text-gray-400 font-medium">Date</th>
                     <th className="text-left px-5 py-3 text-gray-500 dark:text-gray-400 font-medium">Type</th>
-                    <th className="text-left px-5 py-3 text-gray-500 dark:text-gray-400 font-medium">Location</th>
                     <th className="text-left px-5 py-3 text-gray-500 dark:text-gray-400 font-medium">Status</th>
+                    <th className="text-left px-5 py-3 text-gray-500 dark:text-gray-400 font-medium">Zoom</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
@@ -317,9 +483,46 @@ export default function ClientProfile() {
                       <td className="px-5 py-3 text-gray-900 dark:text-white font-medium whitespace-nowrap">
                         {new Date(a.appointment_date).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400 capitalize">{a.appointment_type || '—'}</td>
-                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">{a.location || '—'}</td>
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-1.5">
+                          {a.is_telehealth && <Video size={13} className="text-blue-500 flex-shrink-0" />}
+                          <span className="capitalize">{a.appointment_type || (a.is_telehealth ? 'Telehealth' : '—')}</span>
+                        </div>
+                      </td>
                       <td className="px-5 py-3"><span className={`badge ${APPT_STATUS_COLORS[a.status]}`}>{a.status}</span></td>
+                      <td className="px-5 py-3">
+                        {a.zoom_join_url ? (
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={a.zoom_join_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center gap-1 text-xs text-blue-600 font-medium hover:underline"
+                            >
+                              <Video size={12} /> Join
+                            </a>
+                            <button
+                              onClick={() => removeZoom(a.id)}
+                              disabled={zoomLoading === a.id}
+                              className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                              title="Remove Zoom"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ) : a.is_telehealth ? (
+                          <button
+                            onClick={() => createZoom(a.id)}
+                            disabled={zoomLoading === a.id}
+                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+                            title="Create Zoom meeting"
+                          >
+                            <Plus size={12} /> Create
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -389,6 +592,14 @@ export default function ClientProfile() {
           client={client}
           onSave={() => { setShowEdit(false); load() }}
           onClose={() => setShowEdit(false)}
+          toast={toast}
+        />
+      )}
+
+      {showPayment && (
+        <PaymentRequestModal
+          client={client}
+          onClose={() => setShowPayment(false)}
           toast={toast}
         />
       )}

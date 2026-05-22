@@ -12,7 +12,9 @@ from database import get_db
 
 SECRET_KEY = "lifeway-crm-secret-key-change-in-production"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 120  # 2 hours
+
+CLINICAL_ROLES = {"admin", "staff"}
 
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -66,6 +68,30 @@ def require_admin(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 
+def require_staff(current_user: models.User = Depends(get_current_user)):
+    """Requires admin or staff role — blocks readonly accounts from mutating data."""
+    if current_user.role not in CLINICAL_ROLES:
+        raise HTTPException(status_code=403, detail="Write access required")
+    return current_user
+
+
+def password_strength_check(password: str) -> None:
+    errors = []
+    if len(password) < 10:
+        errors.append("at least 10 characters")
+    if not any(c.isupper() for c in password):
+        errors.append("one uppercase letter")
+    if not any(c.islower() for c in password):
+        errors.append("one lowercase letter")
+    if not any(c.isdigit() for c in password):
+        errors.append("one number")
+    if errors:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Password must contain: {', '.join(errors)}",
+        )
+
+
 # ── Auth router ───────────────────────────────────────────────────────────────
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -80,6 +106,9 @@ class ChangePasswordRequest(BaseModel):
 def change_password(req: ChangePasswordRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     if not pwd_context.verify(req.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if req.new_password == req.current_password:
+        raise HTTPException(status_code=400, detail="New password must differ from current password")
+    password_strength_check(req.new_password)
     current_user.hashed_password = pwd_context.hash(req.new_password)
     db.commit()
     return {"message": "Password updated successfully"}

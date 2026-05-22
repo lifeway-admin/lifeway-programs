@@ -128,6 +128,7 @@ class AppointmentCreate(AppointmentBase):
     is_recurring: bool = False
     recurrence_count: int = 1
     recurrence_interval_days: int = 7
+    is_telehealth: bool = False
 
 class AppointmentUpdate(BaseModel):
     staff_id: Optional[int] = None
@@ -137,6 +138,7 @@ class AppointmentUpdate(BaseModel):
     location: Optional[str] = None
     notes: Optional[str] = None
     follow_up_needed: Optional[bool] = None
+    is_telehealth: Optional[bool] = None
 
 class AppointmentOut(AppointmentBase):
     id: int
@@ -144,6 +146,10 @@ class AppointmentOut(AppointmentBase):
     google_calendar_event_id: Optional[str] = None
     recurrence_group_id: Optional[str] = None
     recurrence_index: Optional[int] = None
+    confirmation_number: Optional[str] = None
+    is_telehealth: bool = False
+    zoom_join_url: Optional[str] = None
+    zoom_meeting_id: Optional[str] = None
     class Config:
         from_attributes = True
 

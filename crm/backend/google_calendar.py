@@ -136,6 +136,64 @@ def delete_event(event_id: str) -> bool:
         return False
 
 
+def get_staff_credentials(google_token_json: str):
+    """Build Credentials from a per-staff stored token JSON string."""
+    try:
+        from google.oauth2.credentials import Credentials
+        from google.auth.transport.requests import Request
+        import json
+        data = json.loads(google_token_json)
+        creds = Credentials.from_authorized_user_info(data, SCOPES)
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        return creds if creds.valid else None
+    except Exception:
+        return None
+
+
+def get_staff_busy_hours(google_token_json: str, target_date) -> set:
+    """Return a set of hours (0-23) that are busy on target_date for a specific therapist."""
+    try:
+        from googleapiclient.discovery import build
+        from datetime import date as _date
+        import pytz
+
+        creds = get_staff_credentials(google_token_json)
+        if not creds:
+            return set()
+        service = build("calendar", "v3", credentials=creds)
+
+        tz = pytz.timezone("America/New_York")
+        if isinstance(target_date, _date):
+            from datetime import datetime as _dt
+            day_start = tz.localize(_dt.combine(target_date, _dt.min.time()))
+            day_end = tz.localize(_dt.combine(target_date, _dt.max.time()))
+        else:
+            day_start = target_date
+            day_end = target_date
+
+        result = service.freebusy().query(body={
+            "timeMin": day_start.isoformat(),
+            "timeMax": day_end.isoformat(),
+            "items": [{"id": "primary"}],
+        }).execute()
+
+        busy = result.get("calendars", {}).get("primary", {}).get("busy", [])
+        busy_hours = set()
+        for period in busy:
+            from datetime import datetime as _dt
+            start = _dt.fromisoformat(period["start"].replace("Z", "+00:00")).astimezone(tz)
+            end = _dt.fromisoformat(period["end"].replace("Z", "+00:00")).astimezone(tz)
+            h = start.hour
+            while h < end.hour or (h == end.hour and end.minute > 0):
+                busy_hours.add(h)
+                h += 1
+        return busy_hours
+    except Exception as e:
+        print(f"Google Calendar free/busy error: {e}")
+        return set()
+
+
 def list_upcoming_events(days: int = 7) -> list:
     """Fetch upcoming events from Google Calendar."""
     service = get_service()

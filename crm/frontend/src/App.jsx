@@ -18,6 +18,10 @@ import Reports from './pages/Reports'
 import AuditLog from './pages/AuditLog'
 import ChangePassword from './pages/ChangePassword'
 import IntakeForm from './pages/IntakeForm'
+import Policies from './pages/Policies'
+import Settings from './pages/Settings'
+import MySchedule from './pages/MySchedule'
+import AcceptInvite from './pages/AcceptInvite'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -34,6 +38,7 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/intake" element={<IntakeForm />} />
+              <Route path="/accept-invite/:token" element={<AcceptInvite />} />
               <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
                 <Route index element={<Navigate to="/home" replace />} />
                 <Route path="home" element={<Home />} />
@@ -48,6 +53,9 @@ export default function App() {
                 <Route path="reports" element={<Reports />} />
                 <Route path="audit-log" element={<AuditLog />} />
                 <Route path="change-password" element={<ChangePassword />} />
+                <Route path="policies" element={<Policies />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="my-schedule" element={<MySchedule />} />
               </Route>
             </Routes>
           </BrowserRouter>

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
-from auth import get_current_user
+from auth import get_current_user, require_staff, require_admin
 from database import get_db
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
@@ -163,7 +163,7 @@ def list_tickets(
 def create_ticket(
     ticket: schemas.TicketCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_staff),
 ):
     db_ticket = models.Ticket(**ticket.model_dump())
     db.add(db_ticket)
@@ -191,7 +191,7 @@ def update_ticket(
     ticket_id: int,
     updates: schemas.TicketUpdate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_staff),
 ):
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
     if not ticket:
@@ -211,7 +211,7 @@ def update_ticket(
 
 
 @router.delete("/{ticket_id}", status_code=204)
-def delete_ticket(ticket_id: int, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def delete_ticket(ticket_id: int, db: Session = Depends(get_db), _=Depends(require_admin)):
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
@@ -226,7 +226,7 @@ def add_comment(
     ticket_id: int,
     comment: schemas.TicketCommentCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_staff),
 ):
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
     if not ticket:

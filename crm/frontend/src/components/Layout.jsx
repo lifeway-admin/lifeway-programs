@@ -3,36 +3,60 @@ import { useState } from 'react'
 import {
   LayoutDashboard, Users, Calendar, DollarSign,
   UserCheck, Sparkles, LogOut, Heart, Tag,
-  Moon, Sun, Search, Home, BarChart2, Lock, AlignJustify, Clock, ChevronRight, FileText,
+  Search, Home, BarChart2, Clock, FileText, Shield, Settings, CalendarDays,
 } from 'lucide-react'
-import { useTheme } from '../context/ThemeContext'
 import GlobalSearch from './GlobalSearch'
 import GoogleCalendarStatus from './GoogleCalendarStatus'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
-import { useDensity } from '../context/DensityContext'
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
 import SessionTimeoutWarning from './SessionTimeoutWarning'
 
-const nav = [
-  { to: '/home', icon: Home, label: 'Home' },
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/clients', icon: Users, label: 'Clients' },
-  { to: '/appointments', icon: Calendar, label: 'Appointments' },
-  { to: '/donations', icon: DollarSign, label: 'Donations' },
-  { to: '/tickets', icon: Tag, label: 'Tickets' },
-  { to: '/staff', icon: UserCheck, label: 'Staff & Volunteers' },
-  { to: '/ai-agent', icon: Sparkles, label: 'AI Marketing' },
-  { to: '/reports', icon: BarChart2, label: 'Reports' },
-  { to: '/audit-log', icon: FileText, label: 'Audit Log' },
-  { to: '/change-password', icon: Lock, label: 'Change Password' },
+const navSections = [
+  {
+    label: null,
+    items: [
+      { to: '/home', icon: Home, label: 'Home' },
+      { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/my-schedule', icon: CalendarDays, label: 'My Schedule' },
+    ],
+  },
+  {
+    label: 'Clients & Services',
+    items: [
+      { to: '/clients', icon: Users, label: 'Clients' },
+      { to: '/appointments', icon: Calendar, label: 'Appointments' },
+      { to: '/donations', icon: DollarSign, label: 'Donations' },
+      { to: '/tickets', icon: Tag, label: 'Tickets' },
+    ],
+  },
+  {
+    label: 'Management',
+    items: [
+      { to: '/staff', icon: UserCheck, label: 'Staff & Volunteers' },
+      { to: '/reports', icon: BarChart2, label: 'Reports' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { to: '/audit-log', icon: FileText, label: 'Audit Log' },
+      { to: '/policies', icon: Shield, label: 'Policies' },
+      { to: '/settings', icon: Settings, label: 'Settings' },
+    ],
+  },
+  {
+    label: 'Under Development',
+    dev: true,
+    items: [
+      { to: '/ai-agent', icon: Sparkles, label: 'AI Marketing' },
+    ],
+  },
 ]
 
 export default function Layout() {
   const navigate = useNavigate()
-  const { theme, toggleTheme } = useTheme()
   const [showSearch, setShowSearch] = useState(false)
   const { recentItems } = useRecentlyViewed()
-  const { density, toggleDensity } = useDensity()
   const [showHelp, setShowHelp] = useState(false)
   useKeyboardShortcuts({ onSearchOpen: () => setShowSearch(true), onHelpOpen: () => setShowHelp(true), navigate })
 
@@ -57,22 +81,46 @@ export default function Layout() {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {nav.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-lifeway-light text-lifeway-pink'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-                }`
-              }
-            >
-              <Icon size={18} />
-              {label}
-            </NavLink>
+        <nav className="flex-1 p-4 overflow-y-auto space-y-4">
+          {navSections.map((section, si) => (
+            <div key={si}>
+              {section.label && (
+                <p className={`text-xs font-bold uppercase tracking-widest px-3 mb-1 ${
+                  section.dev
+                    ? 'text-amber-400 dark:text-amber-500'
+                    : 'text-gray-400 dark:text-gray-500'
+                }`}>
+                  {section.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {section.items.map(({ to, icon: Icon, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        section.dev
+                          ? isActive
+                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
+                            : 'text-gray-400 dark:text-gray-500 hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:text-amber-600 dark:hover:text-amber-400'
+                          : isActive
+                            ? 'bg-lifeway-light text-lifeway-pink'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                      }`
+                    }
+                  >
+                    <Icon size={18} />
+                    <span>{label}</span>
+                    {section.dev && (
+                      <span className="ml-auto text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 rounded px-1.5 py-0.5 leading-none">
+                        WIP
+                      </span>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
@@ -100,20 +148,6 @@ export default function Layout() {
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-1">
           <GoogleCalendarStatus />
-          <button
-            onClick={toggleDensity}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 w-full transition-colors"
-          >
-            <AlignJustify size={18} />
-            {density === 'compact' ? 'Comfortable view' : 'Compact view'}
-          </button>
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 w-full transition-colors"
-          >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-          </button>
           <button
             onClick={logout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 w-full transition-colors"

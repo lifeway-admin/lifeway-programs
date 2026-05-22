@@ -1,6 +1,6 @@
 import csv
 import io
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -8,7 +8,8 @@ from typing import List, Optional
 from datetime import datetime
 import models, schemas
 from database import get_db
-from auth import get_current_user
+from auth import get_current_user, require_staff, require_admin
+from limiter import limiter
 
 router = APIRouter(prefix="/donations", tags=["donations"])
 
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/donations", tags=["donations"])
 @router.get("/", response_model=List[schemas.DonationOut])
 def list_donations(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, le=500),
     campaign: Optional[str] = None,
     donation_type: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -57,7 +58,8 @@ def donation_summary(db: Session = Depends(get_db), _=Depends(get_current_user))
 
 
 @router.get("/export/csv")
-def export_donations_csv(db: Session = Depends(get_db), _=Depends(get_current_user)):
+@limiter.limit("5/minute")
+def export_donations_csv(request: Request, db: Session = Depends(get_db), _=Depends(get_current_user)):
     donations = db.query(models.Donation).order_by(models.Donation.donation_date.desc()).all()
 
     def generate():
@@ -84,7 +86,7 @@ def export_donations_csv(db: Session = Depends(get_db), _=Depends(get_current_us
 
 
 @router.post("/", response_model=schemas.DonationOut, status_code=201)
-def create_donation(donation: schemas.DonationCreate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def create_donation(donation: schemas.DonationCreate, db: Session = Depends(get_db), _=Depends(require_staff)):
     db_donation = models.Donation(**donation.model_dump())
     db.add(db_donation)
     db.commit()
@@ -101,7 +103,7 @@ def get_donation(donation_id: int, db: Session = Depends(get_db), _=Depends(get_
 
 
 @router.patch("/{donation_id}", response_model=schemas.DonationOut)
-def update_donation(donation_id: int, updates: schemas.DonationUpdate, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def update_donation(donation_id: int, updates: schemas.DonationUpdate, db: Session = Depends(get_db), _=Depends(require_staff)):
     donation = db.query(models.Donation).filter(models.Donation.id == donation_id).first()
     if not donation:
         raise HTTPException(status_code=404, detail="Donation not found")
@@ -110,3 +112,12 @@ def update_donation(donation_id: int, updates: schemas.DonationUpdate, db: Sessi
     db.commit()
     db.refresh(donation)
     return donation
+
+
+@router.delete("/{donation_id}", status_code=204)
+def delete_donation(donation_id: int, db: Session = Depends(get_db), _=Depends(require_admin)):
+    donation = db.query(models.Donation).filter(models.Donation.id == donation_id).first()
+    if not donation:
+        raise HTTPException(status_code=404, detail="Donation not found")
+    db.delete(donation)
+    db.commit()

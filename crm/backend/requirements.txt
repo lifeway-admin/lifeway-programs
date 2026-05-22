@@ -6,3 +6,11 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
 anthropic>=0.28.0
+slowapi==0.1.9
+apscheduler==3.10.4
+python-dotenv>=1.0.0
+pytz>=2024.1
+twilio>=8.0.0
+stripe>=8.0.0
+fpdf2>=2.7.0
+requests>=2.31.0
