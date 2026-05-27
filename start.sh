@@ -18,6 +18,16 @@ cd "$(dirname "$0")/crm/frontend"
 npm run dev > /tmp/crm_frontend.log 2>&1 &
 echo "  CRM Frontend →  http://localhost:5173"
 
+# Start public booking app
+cd "$(dirname "$0")/booking"
+npm run dev > /tmp/booking.log 2>&1 &
+echo "  Booking App  →  http://localhost:5174"
+
+# Start lifeway marketing site
+cd "$(dirname "$0")/lifeway"
+npm run dev > /tmp/lifeway.log 2>&1 &
+echo "  Marketing    →  http://localhost:5175"
+
 # Start site mirror
 cd "$(dirname "$0")"
 python3 mirror.py --serve > /dev/null 2>&1 &

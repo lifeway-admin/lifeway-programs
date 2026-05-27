@@ -148,6 +148,15 @@ export default function Layout() {
 
         <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-1">
           <GoogleCalendarStatus />
+          <a
+            href={import.meta.env.VITE_MARKETING_URL || 'http://localhost:5175'}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 w-full transition-colors"
+          >
+            <Home size={18} />
+            Lifeway Programs Site
+          </a>
           <button
             onClick={logout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 w-full transition-colors"

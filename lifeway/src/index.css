@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Inter', system-ui, sans-serif; }
+
+@layer components {
+  .btn-primary {
+    @apply bg-lw-pink text-white px-6 py-3 rounded-lg font-semibold hover:bg-lw-pink-dark transition-colors inline-block;
+  }
+  .btn-outline {
+    @apply border-2 border-lw-pink text-lw-pink px-6 py-3 rounded-lg font-semibold hover:bg-lw-pink hover:text-white transition-colors inline-block;
+  }
+  .section {
+    @apply max-w-6xl mx-auto px-6 py-20;
+  }
+  .section-sm {
+    @apply max-w-6xl mx-auto px-6 py-12;
+  }
+}
