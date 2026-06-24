@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
-import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar } from 'lucide-react'
+import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles, Shield } from 'lucide-react'
 
 const services = [
-  { img: '/images/icons/mental-health.png', title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more — for children, teens, and adults.' },
-  { img: '/images/icons/wellness.png', title: 'Medical & Wellness', desc: 'Primary care, preventive health, lab testing, nutrition coaching, and IV wellness therapy. Telehealth available.' },
-  { img: '/images/icons/resource.png', title: 'Social Services', desc: 'Case management, housing, food support, utility assistance, referrals, and community resources.' },
-  { img: '/images/icons/employment.png', title: 'Employment Support', desc: 'Job placement, vocational counseling, life skills, and financial coaching to help you build stability.' },
-  { img: '/images/icons/referral.png', title: 'Spiritual Care', desc: 'Faith-based inner healing, spiritual assessment, pastoral support, and prayer — healing the whole person.' },
-  { img: '/images/icons/wellness.png', title: 'Addiction Recovery', desc: 'Outpatient and intensive outpatient programs, dual diagnosis support, and 12-step program referrals.' },
+  { icon: Brain, title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more — for children, teens, and adults.' },
+  { icon: Activity, title: 'Medical & Wellness', desc: 'Primary care, preventive health, lab testing, nutrition coaching, and IV wellness therapy. Telehealth available.' },
+  { icon: Users, title: 'Social Services', desc: 'Case management, housing, food support, utility assistance, referrals, and community resources.' },
+  { icon: Briefcase, title: 'Employment Support', desc: 'Job placement, vocational counseling, life skills, and financial coaching to help you build stability.' },
+  { icon: Sparkles, title: 'Spiritual Care', desc: 'Faith-based inner healing, spiritual assessment, pastoral support, and prayer — healing the whole person.' },
+  { icon: Shield, title: 'Addiction Recovery', desc: 'Outpatient and intensive outpatient programs, dual diagnosis support, and 12-step program referrals.' },
 ]
 
 const testimonials = [
@@ -34,24 +34,23 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-flex items-center gap-2 bg-lw-pink/20 text-lw-pink text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider">
-                <Heart size={12} /> Christian Holistic Care
+                <Heart size={12} /> Christian Holistic Care · Free for All
               </span>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                Healing, Hope &<br />
-                <span className="text-lw-pink">Dignity — Free</span><br />
-                for All
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
+                Healing, Hope<br />
+                <span className="text-lw-pink">& Dignity</span>
               </h1>
-              <p className="text-gray-300 text-lg leading-relaxed mb-4 max-w-lg">
-                At LifeWay Center, we are a Christian faith-based 501(c)(3) nonprofit committed to offering free therapeutic, wellness, and social service support to individuals and families in need.
+              <p className="text-pink-200 italic text-base mb-6 leading-relaxed max-w-md">
+                "Because healing, hope, and dignity should never come with a price tag."
               </p>
-              <p className="text-lw-pink font-semibold italic mb-8 text-sm">
-                "…because healing, hope, and dignity should never come with a price tag."
+              <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-lg">
+                You are seen. You are valued. You are not alone. We walk alongside you with free, compassionate care — no matter your story, your background, or where you are on your journey.
               </p>
               <div className="flex flex-wrap gap-4 mb-8">
                 <Link to="/book" className="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
-                  <Calendar size={16} /> Book Free Appointment
+                  <Calendar size={16} /> Take the First Step
                 </Link>
-                <Link to="/services" className="border-2 border-white/30 text-white px-8 py-3.5 rounded-lg font-semibold hover:border-white transition-colors text-base flex items-center gap-2">
+                <Link to="/services" className="border-2 border-white/30 text-white px-8 py-3.5 rounded-xl font-semibold hover:border-white transition-colors text-base flex items-center gap-2">
                   Our Services <ArrowRight size={16} />
                 </Link>
               </div>
@@ -69,22 +68,27 @@ export default function Home() {
                   <Link
                     key={a}
                     to="/book"
-                    className="flex items-center justify-between bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl px-5 py-4 transition-colors group"
+                    className="flex items-center justify-between bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl px-5 py-4 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-lw-pink" />
                       <span className="text-sm font-medium">Receive {a}</span>
                     </div>
                     <span className="text-xs text-lw-pink font-semibold bg-lw-pink/20 px-2.5 py-1 rounded-full group-hover:bg-lw-pink/30 transition-colors">
-                      Free Appointment
+                      Free · No Waitlist
                     </span>
                   </Link>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-4 text-center">You're just a click away</p>
+              <p className="text-xs text-gray-500 mt-4 text-center">Same-day appointments available</p>
             </div>
           </div>
         </div>
+
+        {/* Warm wave transition */}
+        <svg viewBox="0 0 1440 48" className="block w-full" preserveAspectRatio="none" style={{ marginBottom: '-1px' }}>
+          <path fill="#e91e8c" d="M0,48 C360,0 1080,0 1440,48 L1440,48 L0,48 Z" />
+        </svg>
       </section>
 
       {/* Mission bar */}
@@ -105,16 +109,16 @@ export default function Home() {
       <section className="section">
         <div className="text-center mb-14">
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">What We Offer</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-4">Holistic Care for the Whole Person</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-4">Whatever You're Carrying,<br className="hidden md:block" /> We're Here</h2>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            We combine professional clinical expertise with biblical wisdom and deep compassion — addressing body, mind, and spirit.
+            From grief and anxiety to housing challenges and addiction recovery — our team wraps around you and your family with real professional care and genuine love.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map(s => (
-            <div key={s.title} className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-              <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5 overflow-hidden">
-                <img src={s.img} alt={s.title} className="w-8 h-8 object-contain" onError={e => { e.target.style.display='none' }} />
+            <div key={s.title} className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-gray-50">
+              <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5">
+                <s.icon size={26} className="text-lw-pink" />
               </div>
               <h3 className="text-lg font-bold text-lw-navy mb-3">{s.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-5">{s.desc}</p>
@@ -127,14 +131,14 @@ export default function Home() {
       </section>
 
       {/* Why LifeWay */}
-      <section className="bg-lw-pink-light">
+      <section className="bg-lw-warm">
         <div className="section">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Why LifeWay Center</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">Care That Meets You Where You Are</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">A Place Where You<br />Truly Belong</h2>
               <p className="text-gray-500 leading-relaxed mb-8">
-                We are a Christ-centered movement of healing, hope, and holistic transformation — serving children, families, and individuals with high-quality clinical care that addresses the whole person.
+                We're not just a clinic — we're a community. A Christ-centered family that sees you as a whole person, meets you without judgment, and walks with you every step of the way toward healing and wholeness.
               </p>
               <ul className="space-y-3">
                 {[
@@ -159,38 +163,99 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Real photo */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <img src="/images/photos/event1.jpg" alt="LifeWay Community" className="rounded-2xl w-full h-48 object-cover" />
-                <img src="/images/photos/event2.jpg" alt="LifeWay Team" className="rounded-2xl w-full h-48 object-cover" />
-                <img src="/images/photos/event3.jpg" alt="LifeWay Programs" className="rounded-2xl w-full h-48 object-cover" />
-                <img src="/images/photos/event4.jpg" alt="LifeWay Community" className="rounded-2xl w-full h-48 object-cover" />
-              </div>
+            {/* Access features */}
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                {
+                  icon: Calendar,
+                  title: 'Same-Day Appointments',
+                  desc: 'No long waitlists. We make space for you the moment you reach out — because healing shouldn\'t have to wait.',
+                },
+                {
+                  icon: Clock,
+                  title: 'Monday – Saturday, 9am – 9pm',
+                  desc: 'Evening sessions available so care fits into your life, not the other way around.',
+                },
+                {
+                  icon: Phone,
+                  title: 'Statewide Telehealth',
+                  desc: 'Serving all of Florida from wherever you are — secure video sessions on any device.',
+                },
+                {
+                  icon: Heart,
+                  title: 'Cost Is Never a Barrier',
+                  desc: 'Medicaid, Medicare, private insurance, sliding scale fees, and scholarships — we find a way for everyone.',
+                },
+              ].map(f => (
+                <div key={f.title} className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-50 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-lw-pink-light flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <f.icon size={18} className="text-lw-pink" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lw-navy text-sm mb-0.5">{f.title}</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="section">
-        <div className="text-center mb-12">
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Google Reviews</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-2">What Our Clients Say</h2>
-          <p className="text-gray-500">Real experiences from the people we serve</p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {testimonials.map(t => (
-            <div key={t.name} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: t.stars }).map((_, i) => (
-                  <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
-                ))}
+      <section className="bg-lw-pink-light">
+        <div className="section">
+          {/* Header with aggregate rating */}
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-white rounded-full px-5 py-2.5 shadow-sm mb-6">
+              <span className="font-bold text-lg" style={{ background: 'linear-gradient(135deg, #4285F4 25%, #EA4335 25%, #EA4335 50%, #FBBC05 50%, #FBBC05 75%, #34A853 75%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>G</span>
+              <span className="text-gray-700 text-sm font-semibold">Google Reviews</span>
+              <span className="text-gray-300">·</span>
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map(i => <Star key={i} size={13} className="text-yellow-400 fill-yellow-400" />)}
               </div>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4 italic">"{t.text}"</p>
-              <p className="font-semibold text-lw-navy text-sm">— {t.name}</p>
+              <span className="text-gray-700 text-sm font-bold">5.0</span>
             </div>
-          ))}
+            <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mb-3">Voices From Our Community</h2>
+            <p className="text-gray-500 max-w-md mx-auto">Real experiences from the people we're honored to walk alongside</p>
+          </div>
+
+          {/* Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {testimonials.map(t => (
+              <div key={t.name} className="bg-white rounded-3xl p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                <span className="absolute top-4 right-5 text-6xl font-serif text-lw-pink/10 leading-none select-none">"</span>
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed flex-1 mb-6">
+                  "{t.text}"
+                </p>
+                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lw-pink to-lw-pink-dark flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {t.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lw-navy text-sm">{t.name}</p>
+                    <p className="text-xs text-gray-400">Google Review</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <a
+              href="https://www.google.com/search?q=LifeWay+Center+reviews"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-lw-pink hover:text-lw-pink-dark transition-colors"
+            >
+              Read all reviews on Google <ArrowRight size={14} />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -199,22 +264,23 @@ export default function Home() {
         <div className="section">
           <div className="text-center mb-12">
             <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Find Us</span>
-            <h2 className="text-3xl font-bold mt-2">Two Locations + Statewide Telehealth</h2>
+            <h2 className="text-3xl font-bold mt-2">Come As You Are — We're Close By</h2>
+            <p className="text-gray-400 mt-3 text-sm">Two welcoming locations in South Florida, plus telehealth statewide</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="bg-white/10 rounded-2xl p-8">
+            <div className="bg-white/10 rounded-3xl p-8 hover:bg-white/15 transition-colors">
               <MapPin size={28} className="text-lw-pink mx-auto mb-4" />
               <h3 className="font-bold text-lg mb-2">Homestead, FL</h3>
               <p className="text-gray-300 text-sm">15300 SW 288th Street<br />Homestead, FL 33033</p>
             </div>
-            <div className="bg-white/10 rounded-2xl p-8">
+            <div className="bg-white/10 rounded-3xl p-8 hover:bg-white/15 transition-colors">
               <MapPin size={28} className="text-lw-pink mx-auto mb-4" />
               <h3 className="font-bold text-lg mb-2">Riverview, FL</h3>
               <p className="text-gray-300 text-sm">10621 Tucker Jones Rd<br />Riverview, FL 33578</p>
             </div>
-            <div className="bg-lw-pink/20 border border-lw-pink/30 rounded-2xl p-8">
+            <div className="bg-lw-pink/20 border border-lw-pink/30 rounded-3xl p-8">
               <Phone size={28} className="text-lw-pink mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Call or Text</h3>
+              <h3 className="font-bold text-lg mb-2">Call or Text Us</h3>
               <a href="tel:8883313060" className="text-lw-pink font-bold text-xl">(888) 331-3060</a>
               <p className="text-gray-400 text-sm mt-2">Mon–Sat · 9am–9pm</p>
             </div>
@@ -224,18 +290,20 @@ export default function Home() {
 
       {/* CTA */}
       <section className="bg-lw-pink">
-        <div className="max-w-4xl mx-auto px-6 py-16 text-center text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Heal, Grow, and Soar?</h2>
-          <p className="text-pink-100 mb-8 text-lg">Let us walk with you — clinically, spiritually, and compassionately.</p>
+        <div className="max-w-4xl mx-auto px-6 py-20 text-center text-white">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">You Don't Have to Face This Alone</h2>
+          <p className="text-pink-100 mb-8 text-lg max-w-xl mx-auto leading-relaxed">
+            Taking that first step can feel hard. We promise to make everything after that easy — compassionate, confidential, and completely free.
+          </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/book" className="bg-white text-lw-pink font-bold px-8 py-3.5 rounded-lg hover:bg-pink-50 transition-colors flex items-center gap-2">
-              <Calendar size={16} /> Book Free Appointment
+            <Link to="/book" className="bg-white text-lw-pink font-bold px-8 py-3.5 rounded-xl hover:bg-pink-50 transition-colors flex items-center gap-2">
+              <Calendar size={16} /> Take the First Step
             </Link>
-            <Link to="/contact" className="border-2 border-white text-white font-bold px-8 py-3.5 rounded-lg hover:bg-white/10 transition-colors">
-              Contact Us
+            <Link to="/contact" className="border-2 border-white text-white font-bold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-colors">
+              Talk to Us First
             </Link>
           </div>
-          <p className="text-pink-200 text-sm mt-6">You're just a click away · Same-day appointments available</p>
+          <p className="text-pink-200 text-sm mt-6">Same-day appointments available · No insurance required</p>
         </div>
       </section>
     </div>

@@ -37,9 +37,18 @@ export default function About() {
                 <span className="text-sm text-gray-400 not-italic mt-1 block">— Isaiah 40:31</span>
               </blockquote>
             </div>
-            <div className="hidden md:block">
-              <img src="/images/photos/about-banner.jpg" alt="About LifeWay Center"
-                className="rounded-2xl w-full h-80 object-cover opacity-80" />
+            <div className="hidden md:flex flex-col gap-4">
+              <blockquote className="bg-white/10 rounded-2xl p-6 border-l-4 border-lw-pink">
+                <p className="text-pink-100 italic leading-relaxed">"We are more than a clinic — we are a Christ-centered movement of healing, hope, and holistic transformation for every person who walks through our doors."</p>
+              </blockquote>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {[['20+', 'Years'], ['2', 'Locations'], ['Free', 'Always']].map(([v, l]) => (
+                  <div key={l} className="bg-white/10 rounded-xl p-4">
+                    <p className="text-lw-pink font-bold text-xl">{v}</p>
+                    <p className="text-gray-400 text-xs mt-0.5">{l}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -73,13 +82,28 @@ export default function About() {
                 Her vision for LifeWay Center was born from a conviction that quality mental health, medical, and social services should be freely accessible to everyone — regardless of income, background, or circumstance.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <img src="/images/photos/event5.jpg" alt="LifeWay Programs" className="rounded-2xl w-full h-44 object-cover" />
-              <img src="/images/photos/event6.jpg" alt="LifeWay Community" className="rounded-2xl w-full h-44 object-cover" />
-              <div className="col-span-2 bg-lw-pink rounded-2xl p-6 text-white text-center">
-                <p className="text-3xl font-bold mb-1">20+</p>
-                <p className="text-pink-100 text-sm">Years of Clinical Experience</p>
+            <div className="flex flex-col gap-4">
+              <div className="bg-lw-pink rounded-2xl p-6 text-white">
+                <p className="text-4xl font-bold mb-1">20+</p>
+                <p className="font-semibold text-sm mb-1">Years of Clinical Experience</p>
+                <p className="text-pink-100 text-xs leading-relaxed">Spanning community mental health, social services, trauma-informed care, and faith-based counseling across South Florida.</p>
               </div>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { value: 'LCSW', label: 'Florida Licensed', sub: 'Clinical Social Worker' },
+                  { value: 'EN·ES', label: 'Bilingual', sub: 'English & Spanish' },
+                  { value: '501c3', label: 'Nonprofit', sub: 'Free for All' },
+                ].map(s => (
+                  <div key={s.label} className="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <p className="text-lw-pink font-bold text-sm mb-0.5">{s.value}</p>
+                    <p className="text-lw-navy text-xs font-semibold">{s.label}</p>
+                    <p className="text-gray-400 text-xs">{s.sub}</p>
+                  </div>
+                ))}
+              </div>
+              <blockquote className="border-l-4 border-lw-pink pl-4 italic text-gray-500 text-sm leading-relaxed">
+                "Every soul we serve carries divine potential waiting to be unlocked."
+              </blockquote>
             </div>
           </div>
         </div>

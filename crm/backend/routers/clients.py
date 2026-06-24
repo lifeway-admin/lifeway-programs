@@ -64,7 +64,7 @@ def count_clients(
 
 @router.get("/export/csv")
 @limiter.limit("5/minute")
-def export_clients_csv(request: Request, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def export_clients_csv(request: Request, db: Session = Depends(get_db), _=Depends(require_admin)):
     clients = db.query(models.Client).order_by(models.Client.last_name).all()
 
     def generate():
@@ -242,8 +242,8 @@ def send_payment_request(
                 description=body.description,
                 checkout_url=checkout_url,
             )
-        except Exception as e:
-            print(f"[payment] Email failed: {e}")
+        except Exception:
+            pass
 
     # Send SMS
     if body.send_sms and client.phone:
@@ -256,7 +256,7 @@ def send_payment_request(
                 description=body.description,
                 checkout_url=checkout_url,
             )
-        except Exception as e:
-            print(f"[payment] SMS failed: {e}")
+        except Exception:
+            pass
 
     return {"success": True, "checkout_url": checkout_url, "amount": amount_str}

@@ -117,7 +117,7 @@ def appointments_today(db: Session = Depends(get_db), _=Depends(get_current_user
 
 @router.get("/export/csv")
 @limiter.limit("5/minute")
-def export_appointments_csv(request: Request, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def export_appointments_csv(request: Request, db: Session = Depends(get_db), _=Depends(require_admin)):
     appts = db.query(models.Appointment).order_by(models.Appointment.appointment_date.desc()).all()
 
     def generate():
@@ -214,8 +214,8 @@ def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(ge
                     db_appt.zoom_meeting_id = meeting_id
                     db.commit()
                     db.refresh(db_appt)
-            except Exception as e:
-                print(f"[appointments] Zoom creation error: {e}")
+            except Exception:
+                pass
         return db_appt
 
 

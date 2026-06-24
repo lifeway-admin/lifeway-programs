@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
-from auth import get_current_user
+from auth import get_current_user, require_admin
 from database import get_db
 
 router = APIRouter(prefix="/activity", tags=["activity"])
@@ -16,7 +16,7 @@ def list_activity(
     entity_type: Optional[str] = None,
     entity_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    _=Depends(require_admin),
 ):
     q = db.query(models.ActivityLog)
     if entity_type:

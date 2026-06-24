@@ -178,7 +178,7 @@ _CONFNUM_CHARS = string.ascii_uppercase + string.digits
 
 def _generate_confirmation_number(db) -> str:
     for _ in range(10):
-        candidate = "LW-" + "".join(secrets.choice(_CONFNUM_CHARS) for _ in range(6))
+        candidate = "LW-" + "".join(secrets.choice(_CONFNUM_CHARS) for _ in range(12))
         exists = db.query(models.Appointment).filter(
             models.Appointment.confirmation_number == candidate
         ).first()
@@ -274,7 +274,7 @@ def book_appointment(request: Request, body: BookingRequest, db: Session = Depen
                 appointment.zoom_meeting_id = meeting_id
                 db.commit()
         except Exception as e:
-            print(f"[book] Zoom creation error: {e}")
+            pass
 
     # 6. Look up provider name for notifications
     provider_name = "To Be Assigned"
@@ -435,10 +435,14 @@ class SignFormsRequest(BaseModel):
 @router.post("/sign-forms")
 @limiter.limit("10/hour")
 def sign_forms(request: Request, body: SignFormsRequest, db: Session = Depends(get_db)):
-    # Verify client exists
+    # Verify client exists and that the provided email matches the record
     client = db.query(models.Client).filter(models.Client.id == body.client_id).first()
     if not client:
         raise HTTPException(status_code=400, detail="Invalid request")
+    # Require email verification — must match what's on file (case-insensitive)
+    if body.patient_email:
+        if not client.email or client.email.strip().lower() != body.patient_email.strip().lower():
+            raise HTTPException(status_code=400, detail="Invalid request")
 
     # If appointment_id provided, verify it belongs to this client
     if body.appointment_id:
@@ -494,6 +498,49 @@ def sign_forms(request: Request, body: SignFormsRequest, db: Session = Depends(g
     return {"success": True, "signed_count": len(saved)}
 
 
+class ContactRequest(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    subject: Optional[str] = None
+    message: str
+
+
+@router.post("/contact")
+@limiter.limit("5/hour")
+def contact_form(request: Request, body: ContactRequest):
+    """Receives website contact form submissions and forwards to staff inbox."""
+    try:
+        from email_service import _send
+        subject_line = f"[Contact Form] {body.subject or 'General Inquiry'} — {body.name}"
+        html = f"""
+        <div style="font-family:sans-serif;max-width:600px;color:#1f2937;">
+          <h2 style="color:#e91e8c;">New Contact Form Submission</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;width:120px;">Name</td>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.name}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Email</td>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.email}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Phone</td>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.phone or '—'}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Topic</td>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.subject or '—'}</td></tr>
+          </table>
+          <div style="margin-top:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
+            <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:#9ca3af;letter-spacing:1px;">Message</p>
+            <p style="margin:0;font-size:14px;white-space:pre-wrap;">{body.message}</p>
+          </div>
+          <p style="margin-top:16px;font-size:12px;color:#9ca3af;">Sent via lifewayprograms.org contact form</p>
+        </div>"""
+        import os
+        staff_inbox = os.getenv("SMTP_FROM_EMAIL", "")
+        if staff_inbox:
+            _send(staff_inbox, subject_line, html)
+    except Exception:
+        pass
+    return {"success": True}
+
+
 class InviteAcceptRequest(BaseModel):
     first_name: str
     last_name: str
@@ -535,8 +582,9 @@ def accept_invite(request: Request, token: str, body: InviteAcceptRequest, db: S
     if db.query(models.User).filter(models.User.email == invite.email).first():
         raise HTTPException(status_code=400, detail="An account with this email already exists")
 
-    from passlib.hash import sha256_crypt
-    hashed = sha256_crypt.hash(body.password)
+    from passlib.context import CryptContext
+    _bcrypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    hashed = _bcrypt.hash(body.password)
     user = models.User(
         username=body.username,
         email=invite.email,
@@ -555,7 +603,8 @@ def accept_invite(request: Request, token: str, body: InviteAcceptRequest, db: S
 
 
 @router.post("/intake")
-def public_intake(req: IntakeRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/hour")
+def public_intake(request: Request, req: IntakeRequest, db: Session = Depends(get_db)):
     client = models.Client(
         first_name=req.first_name,
         last_name=req.last_name,
@@ -626,7 +675,6 @@ def create_donation_checkout(request: Request, body: DonateRequest):
         )
         return {"checkout_url": session.url, "session_id": session.id}
     except Exception as e:
-        print(f"[stripe] Checkout error: {e}")
         raise HTTPException(status_code=500, detail="Could not create checkout session.")
 
 

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, CheckCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle, Brain, Activity, Shield, Heart, Users, Sparkles } from 'lucide-react'
 
 const services = [
   {
-    img: '/images/icons/mental-health.png',
+    icon: Brain,
     title: 'Mental Health Counseling',
     desc: 'Compassionate, evidence-based therapy for children, teens, and adults — rooted in both clinical expertise and faith.',
     items: [
@@ -18,7 +18,7 @@ const services = [
     ],
   },
   {
-    img: '/images/icons/wellness.png',
+    icon: Activity,
     title: 'Psychiatry & Case Management',
     desc: 'Comprehensive psychiatric and care coordination services to support your mental and overall health.',
     items: [
@@ -30,7 +30,7 @@ const services = [
     ],
   },
   {
-    img: '/images/icons/wellness.png',
+    icon: Shield,
     title: 'Addiction Recovery & Dual Diagnosis',
     desc: 'Structured outpatient programs with clinical and spiritual support for lasting recovery.',
     items: [
@@ -42,7 +42,7 @@ const services = [
     ],
   },
   {
-    img: '/images/icons/wellness.png',
+    icon: Heart,
     title: 'Medical & Integrative Wellness',
     desc: 'Primary care and integrative wellness services addressing your full physical health.',
     items: [
@@ -55,7 +55,7 @@ const services = [
     ],
   },
   {
-    img: '/images/icons/resource.png',
+    icon: Users,
     title: 'Social Services & Case Management',
     desc: 'Connecting you to the resources, support systems, and services you need to thrive.',
     items: [
@@ -68,7 +68,7 @@ const services = [
     ],
   },
   {
-    img: '/images/icons/referral.png',
+    icon: Sparkles,
     title: 'Spiritual Care & Support',
     desc: 'Faith-based healing that honors the whole person — spirit, soul, and body.',
     items: [
@@ -108,9 +108,8 @@ export default function Services() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map(s => (
             <div key={s.title} className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-              <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5 overflow-hidden flex-shrink-0">
-                <img src={s.img} alt={s.title} className="w-8 h-8 object-contain"
-                  onError={e => { e.target.style.display = 'none' }} />
+              <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5 flex-shrink-0">
+                <s.icon size={26} className="text-lw-pink" />
               </div>
               <h3 className="text-xl font-bold text-lw-navy mb-3">{s.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-5">{s.desc}</p>

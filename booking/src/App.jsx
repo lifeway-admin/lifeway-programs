@@ -645,7 +645,7 @@ function DateTimeStep({ selectedProvider, onSelect, t }) {
       </div>
       {isTelehealth && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
-          A Zoom meeting link will be emailed and texted to you after booking.
+          A Google Meet link will be emailed to you after booking.
         </div>
       )}
 
@@ -1134,21 +1134,21 @@ function ConfirmationStep({ confirmation, selectedService, selectedProvider, sel
         t={t}
       />
 
-      {/* Zoom link (telehealth) */}
+      {/* Google Meet link (telehealth) */}
       {confirmation?.zoom_join_url && (
-        <div className="my-4 p-4 bg-green-50 border border-green-200 rounded-xl text-left">
-          <p className="font-semibold text-green-800 text-sm mb-1">Telehealth Appointment</p>
-          <p className="text-xs text-green-700 mb-3">Join your session using the link below. This link was also sent to your email and phone.</p>
+        <div className="my-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-left">
+          <p className="font-semibold text-blue-800 text-sm mb-1">Telehealth Appointment</p>
+          <p className="text-xs text-blue-700 mb-3">Join your session using the Google Meet link below. This link was also sent to your email.</p>
           <a
             href={confirmation.zoom_join_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/>
             </svg>
-            Join Zoom Meeting
+            Join Google Meet
           </a>
           <p className="text-xs text-gray-400 mt-2 break-all">{confirmation.zoom_join_url}</p>
         </div>

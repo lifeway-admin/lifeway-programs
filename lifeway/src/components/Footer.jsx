@@ -28,7 +28,7 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Quick Links</h4>
           <ul className="space-y-2.5">
-            {[['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/team', 'Our Team'], ['/donate', 'Donate'], ['/contact', 'Contact']].map(([to, label]) => (
+            {[['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/team', 'Our Team'], ['/donate', 'Donate'], ['/contact', 'Contact'], ['/faq', 'FAQ']].map(([to, label]) => (
               <li key={to}>
                 <Link to={to} className="text-sm text-gray-300 hover:text-lw-pink transition-colors">{label}</Link>
               </li>
@@ -68,10 +68,19 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Crisis resources */}
+      <div className="border-t border-white/10 bg-lw-navy">
+        <div className="max-w-6xl mx-auto px-6 py-3 text-center text-xs text-gray-500">
+          <span>In crisis? Call or text <a href="tel:988" className="text-lw-pink font-semibold hover:underline">988</a> (Suicide & Crisis Lifeline) — free, confidential, 24/7. For emergencies, call <a href="tel:911" className="text-lw-pink font-semibold hover:underline">911</a>.</span>
+        </div>
+      </div>
+
       <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
           <span>© {new Date().getFullYear()} LifeWay Center — Lifeway Programs, Inc. All rights reserved. · 501(c)(3) Nonprofit</span>
           <div className="flex gap-4">
+            <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
+            <Link to="/hipaa" className="hover:text-gray-300 transition-colors">HIPAA Notice</Link>
             <a href={`${import.meta.env.VITE_CRM_URL || 'http://localhost:5173'}`}
               className="hover:text-gray-300 transition-colors">
               Staff Login

@@ -50,8 +50,8 @@ def check_reminders():
                         service=appt.service_type or appt.appointment_type or "Appointment",
                         provider=provider_name,
                     )
-                except Exception as e:
-                    print(f"[scheduler] Email reminder failed for appointment {appt.id}: {e}")
+                except Exception:
+                    pass  # Do not log PHI
             if client.phone:
                 try:
                     from sms_service import send_appointment_reminder_sms
@@ -62,12 +62,12 @@ def check_reminders():
                         appointment_datetime=appt_dt,
                         zoom_join_url=appt.zoom_join_url,
                     )
-                except Exception as e:
-                    print(f"[scheduler] SMS reminder failed for appointment {appt.id}: {e}")
+                except Exception:
+                    pass  # Do not log PHI
 
         db.commit()
-    except Exception as e:
-        print(f"[scheduler] check_reminders error: {e}")
+    except Exception:
+        pass  # Scheduler errors suppressed to avoid PHI in logs
         db.rollback()
     finally:
         db.close()

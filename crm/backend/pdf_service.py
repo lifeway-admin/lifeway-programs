@@ -127,9 +127,5 @@ def generate_signing_certificate(
 
         return bytes(pdf.output())
 
-    except ImportError:
-        print("[pdf] fpdf2 not installed — returning empty bytes")
-        return b""
-    except Exception as e:
-        print(f"[pdf] Generation error: {e}")
+    except (ImportError, Exception):
         return b""

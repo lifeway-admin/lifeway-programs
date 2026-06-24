@@ -4,11 +4,28 @@ import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react'
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault()
-    setSent(true)
+    setLoading(true)
+    setError('')
+    try {
+      const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const res = await fetch(`${API}/public/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error('Failed to send')
+      setSent(true)
+    } catch {
+      setError('Something went wrong. Please call us at (888) 331-3060.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -148,11 +165,15 @@ export default function Contact() {
                   <textarea required rows={5} value={form.message} onChange={set('message')}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink resize-none" />
                 </div>
-                <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2 py-3.5">
-                  <Send size={16} /> Send Message
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-60">
+                  <Send size={16} /> {loading ? 'Sending…' : 'Send Message'}
                 </button>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700 leading-relaxed">
+                  <strong>Privacy notice:</strong> For your protection, please do not include sensitive health information in this form. Call us directly at <a href="tel:8883313060" className="font-semibold hover:underline">(888) 331-3060</a> for clinical or health-related inquiries.
+                </div>
                 <p className="text-xs text-gray-400 text-center">
-                  For urgent matters, please call <a href="tel:8883313060" className="text-lw-pink">(888) 331-3060</a>. We respond to messages within 1–2 business days.
+                  We respond to messages within 1–2 business days.
                 </p>
               </form>
             )}

@@ -22,7 +22,7 @@ def _get_token() -> Optional[str]:
         resp.raise_for_status()
         return resp.json().get("access_token")
     except Exception as e:
-        print(f"[zoom] Token error: {e}")
+        pass
         return None
 
 
@@ -30,7 +30,6 @@ def create_meeting(topic: str, start_dt: datetime, duration_minutes: int = 60) -
     """Create a Zoom meeting. Returns (join_url, meeting_id) or (None, None)."""
     token = _get_token()
     if not token:
-        print("[zoom] Not configured — skipping meeting creation")
         return None, None
     try:
         import requests
@@ -58,8 +57,7 @@ def create_meeting(topic: str, start_dt: datetime, duration_minutes: int = 60) -
         resp.raise_for_status()
         data = resp.json()
         return data.get("join_url"), str(data.get("id", ""))
-    except Exception as e:
-        print(f"[zoom] Meeting creation error: {e}")
+    except Exception:
         return None, None
 
 
@@ -78,8 +76,7 @@ def delete_meeting(meeting_id: str) -> bool:
             timeout=10,
         )
         return resp.status_code == 204
-    except Exception as e:
-        print(f"[zoom] Delete meeting error: {e}")
+    except Exception:
         return False
 
 

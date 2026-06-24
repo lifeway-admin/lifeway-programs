@@ -37,8 +37,8 @@ def _wrap(inner: str) -> str:
 
 def _send(to: str, subject: str, html: str, attachment_bytes: bytes = None, attachment_filename: str = None):
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASSWORD:
-        print(f"[email] SMTP not configured — skipping email to {to}")
-        return
+        return  # Silently skip — not configured
+
     msg = MIMEMultipart("mixed")
     msg["Subject"] = subject
     msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
@@ -61,8 +61,8 @@ def _send(to: str, subject: str, html: str, attachment_bytes: bytes = None, atta
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_FROM_EMAIL, to, msg.as_string())
-    except Exception as e:
-        print(f"[email] Failed to send to {to}: {e}")
+    except Exception:
+        pass  # Errors suppressed — do not log PHI (recipient address)
 
 
 def send_booking_confirmation(*, to_email: str, patient_name: str, confirmation_number: str,

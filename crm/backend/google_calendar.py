@@ -104,8 +104,7 @@ def create_event(appointment, client_name: str, staff_name: str) -> Optional[str
         event = build_event(appointment, client_name, staff_name)
         result = service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
         return result.get("id")
-    except Exception as e:
-        print(f"Google Calendar create error: {e}")
+    except Exception:
         return None
 
 
@@ -118,8 +117,7 @@ def update_event(event_id: str, appointment, client_name: str, staff_name: str) 
         event = build_event(appointment, client_name, staff_name)
         service.events().update(calendarId=CALENDAR_ID, eventId=event_id, body=event).execute()
         return True
-    except Exception as e:
-        print(f"Google Calendar update error: {e}")
+    except Exception:
         return False
 
 
@@ -131,8 +129,7 @@ def delete_event(event_id: str) -> bool:
     try:
         service.events().delete(calendarId=CALENDAR_ID, eventId=event_id).execute()
         return True
-    except Exception as e:
-        print(f"Google Calendar delete error: {e}")
+    except Exception:
         return False
 
 
@@ -189,8 +186,7 @@ def get_staff_busy_hours(google_token_json: str, target_date) -> set:
                 busy_hours.add(h)
                 h += 1
         return busy_hours
-    except Exception as e:
-        print(f"Google Calendar free/busy error: {e}")
+    except Exception:
         return set()
 
 
@@ -211,6 +207,5 @@ def list_upcoming_events(days: int = 7) -> list:
             orderBy="startTime",
         ).execute()
         return result.get("items", [])
-    except Exception as e:
-        print(f"Google Calendar list error: {e}")
+    except Exception:
         return []

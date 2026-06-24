@@ -2,22 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&display=swap');
 
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Inter', system-ui, sans-serif; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #faf7f4;
+  color: #374151;
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.01em;
+}
 
 @layer components {
   .btn-primary {
-    @apply bg-lw-pink text-white px-6 py-3 rounded-lg font-semibold hover:bg-lw-pink-dark transition-colors inline-block;
+    @apply bg-lw-pink text-white px-6 py-3 rounded-xl font-semibold hover:bg-lw-pink-dark transition-all shadow-sm hover:shadow-md inline-block;
   }
   .btn-outline {
-    @apply border-2 border-lw-pink text-lw-pink px-6 py-3 rounded-lg font-semibold hover:bg-lw-pink hover:text-white transition-colors inline-block;
+    @apply border-2 border-lw-pink text-lw-pink px-6 py-3 rounded-xl font-semibold hover:bg-lw-pink hover:text-white transition-all inline-block;
   }
   .section {
     @apply max-w-6xl mx-auto px-6 py-20;
   }
   .section-sm {
     @apply max-w-6xl mx-auto px-6 py-12;
+  }
+  .card {
+    @apply bg-white rounded-3xl shadow-sm hover:shadow-md transition-all;
   }
 }

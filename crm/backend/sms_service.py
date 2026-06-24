@@ -1,22 +1,34 @@
 import os
+import json
 
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
+OPENPHONE_API_KEY = os.getenv("OPENPHONE_API_KEY", "")
+OPENPHONE_PHONE_NUMBER_ID = os.getenv("OPENPHONE_PHONE_NUMBER_ID", "")
 
 
 def _send_sms(to: str, body: str):
-    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_FROM_NUMBER:
-        print(f"[sms] Twilio not configured — skipping SMS to {to}")
+    if not OPENPHONE_API_KEY or not OPENPHONE_PHONE_NUMBER_ID:
         return
     if not to or not to.strip():
         return
     try:
-        from twilio.rest import Client
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-        client.messages.create(body=body, from_=TWILIO_FROM_NUMBER, to=to.strip())
-    except Exception as e:
-        print(f"[sms] Failed to send to {to}: {e}")
+        import urllib.request
+        payload = json.dumps({
+            "content": body,
+            "from": OPENPHONE_PHONE_NUMBER_ID,
+            "to": [to.strip()],
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.openphone.com/v1/messages",
+            data=payload,
+            headers={
+                "Authorization": OPENPHONE_API_KEY,
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
 
 
 def send_booking_confirmation_sms(*, to_phone: str, patient_name: str, confirmation_number: str,

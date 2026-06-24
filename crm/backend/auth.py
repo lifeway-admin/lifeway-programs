@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -10,13 +11,15 @@ import models
 import schemas
 from database import get_db
 
-SECRET_KEY = "lifeway-crm-secret-key-change-in-production"
+# Must be set in .env — generate with: python3 -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY = os.environ["JWT_SECRET_KEY"]
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 120  # 2 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # HIPAA: short-lived tokens
 
 CLINICAL_ROLES = {"admin", "staff"}
 
-pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
+# bcrypt — industry standard for password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
@@ -77,14 +80,16 @@ def require_staff(current_user: models.User = Depends(get_current_user)):
 
 def password_strength_check(password: str) -> None:
     errors = []
-    if len(password) < 10:
-        errors.append("at least 10 characters")
+    if len(password) < 12:
+        errors.append("at least 12 characters")
     if not any(c.isupper() for c in password):
         errors.append("one uppercase letter")
     if not any(c.islower() for c in password):
         errors.append("one lowercase letter")
     if not any(c.isdigit() for c in password):
         errors.append("one number")
+    if not any(c in "!@#$%^&*()_+-=[]{}|;':\",./<>?" for c in password):
+        errors.append("one special character (!@#$%^&* etc.)")
     if errors:
         raise HTTPException(
             status_code=400,

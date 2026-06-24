@@ -26,6 +26,9 @@ dist/
 # Site mirror (large, regeneratable)
 site_mirror/
 
+# WordPress backup (2.7GB, not part of the app)
+wordpress/
+
 # OS
 .DS_Store
 Thumbs.db

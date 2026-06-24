@@ -86,13 +86,21 @@ def shutdown():
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+import os as _os
+_ALLOWED_ORIGINS = [o.strip() for o in _os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:5174,http://localhost:5175"
+).split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
+
+_PHI_PATHS = ("/clients", "/appointments", "/staff", "/donations", "/tickets", "/public/patient", "/public/sign-forms")
 
 
 @app.middleware("http")
@@ -103,8 +111,9 @@ async def security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    # Prevent browsers from caching PHI returned by API responses
-    if request.url.path.startswith("/clients") or request.url.path.startswith("/appointments"):
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if any(request.url.path.startswith(p) for p in _PHI_PATHS):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
         response.headers["Pragma"] = "no-cache"
     return response
@@ -137,15 +146,20 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
 
 @app.post("/auth/register", response_model=schemas.UserOut, status_code=201)
 @limiter.limit("5/minute")
-def register(request: Request, user: schemas.UserCreate, db: Session = Depends(get_db)):
+def register(request: Request, user: schemas.UserCreate, db: Session = Depends(get_db), _admin=Depends(require_admin)):
+    """Admin-only: create a new user. Role is always set to 'staff' unless caller is admin."""
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
+    # Prevent privilege escalation — only admins can create admins
+    safe_role = user.role if user.role in ("admin", "staff", "readonly") else "staff"
+    from auth import password_strength_check
+    password_strength_check(user.password)
     db_user = models.User(
         username=user.username,
         email=user.email,
         hashed_password=hash_password(user.password),
         full_name=user.full_name,
-        role=user.role,
+        role=safe_role,
     )
     db.add(db_user)
     db.commit()

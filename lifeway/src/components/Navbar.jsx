@@ -11,6 +11,7 @@ const links = [
   { to: '/team', label: 'Our Team' },
   { to: '/donate', label: 'Donate' },
   { to: '/contact', label: 'Contact' },
+  { to: '/faq', label: 'FAQ' },
   { to: null, label: 'Staff Login', href: CRM_URL },
 ]
 

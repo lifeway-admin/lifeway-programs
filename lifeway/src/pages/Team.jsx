@@ -87,11 +87,19 @@ export default function Team() {
           ))}
         </div>
 
-        {/* Real team photos */}
+        {/* Community values strip */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {[1, 2, 3, 4].map(i => (
-            <img key={i} src={`/images/photos/event${i}.jpg`} alt="LifeWay Team"
-              className="rounded-2xl w-full h-48 object-cover" />
+          {[
+            { icon: '🤝', label: 'Compassionate', desc: 'Every team member leads with empathy first' },
+            { icon: '🌎', label: 'Multicultural', desc: 'Fluent in English & Spanish, rooted in community' },
+            { icon: '🎓', label: 'Credentialed', desc: 'Licensed professionals across every discipline' },
+            { icon: '✝️', label: 'Faith-Rooted', desc: 'Clinical excellence grounded in biblical values' },
+          ].map(v => (
+            <div key={v.label} className="bg-white rounded-3xl p-6 text-center shadow-sm border border-gray-50">
+              <p className="text-3xl mb-3">{v.icon}</p>
+              <p className="font-bold text-lw-navy text-sm mb-1">{v.label}</p>
+              <p className="text-xs text-gray-400 leading-snug">{v.desc}</p>
+            </div>
           ))}
         </div>
 

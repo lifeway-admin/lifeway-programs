@@ -54,12 +54,25 @@ function DocViewer({ doc, onClose }) {
       }
       if (line.startsWith('---')) return <hr key={i} className="border-gray-200 dark:border-gray-700 my-4" />
       if (line.trim() === '') return <div key={i} className="h-2" />
-      // Bold/italic inline
-      const formatted = line
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-xs font-mono">$1</code>')
-      return <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed my-1" dangerouslySetInnerHTML={{ __html: formatted }} />
+      // Parse bold/italic/code inline — render as React elements to avoid dangerouslySetInnerHTML
+      const parts = []
+      let remaining = line
+      let key = 0
+      while (remaining.length > 0) {
+        const bold = remaining.match(/^(.*?)\*\*([^*]+)\*\*(.*)$/)
+        const italic = remaining.match(/^(.*?)\*([^*]+)\*(.*)$/)
+        const code = remaining.match(/^(.*?)`([^`]+)`(.*)$/)
+        const first = [bold, italic, code]
+          .filter(Boolean)
+          .sort((a, b) => a[1].length - b[1].length)[0]
+        if (!first) { parts.push(<span key={key++}>{remaining}</span>); break }
+        if (first[1]) parts.push(<span key={key++}>{first[1]}</span>)
+        if (first === bold) parts.push(<strong key={key++}>{first[2]}</strong>)
+        else if (first === italic) parts.push(<em key={key++}>{first[2]}</em>)
+        else parts.push(<code key={key++} className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-xs font-mono">{first[2]}</code>)
+        remaining = first[3]
+      }
+      return <p key={i} className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed my-1">{parts}</p>
     }).filter(Boolean)
   }
 
