@@ -12,7 +12,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 import models, schemas
 from database import engine, get_db, Base
-from auth import authenticate_user, create_access_token, hash_password, get_current_user, auth_router
+from auth import authenticate_user, create_access_token, hash_password, get_current_user, require_admin, auth_router
 from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal, docs as docs_router
 from routers.reports import router as reports_router
 from limiter import limiter
