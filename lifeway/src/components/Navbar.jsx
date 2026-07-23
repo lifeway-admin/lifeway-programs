@@ -1,35 +1,40 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
+import shared from '../lib/i18n/shared'
+import LangToggle from './LangToggle'
 
 const CRM_URL = import.meta.env.VITE_CRM_URL || 'http://localhost:5173'
-
-const links = [
-  { to: '/', label: 'Home' },
-  { to: '/about', label: 'About' },
-  { label: 'Services', dropdown: [
-    { to: '/services', label: 'Overview' },
-    { to: '/insurances', label: 'Insurances Accepted' },
-  ] },
-  { label: 'Our Team', dropdown: [
-    { to: '/founder', label: 'Founder' },
-    { to: '/team', label: 'Team' },
-  ] },
-  { to: '/donate', label: 'Donate' },
-  { to: '/contact', label: 'Contact' },
-  { to: '/faq', label: 'FAQ' },
-  { to: null, label: 'Staff Login', href: CRM_URL },
-]
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(null)
   const { pathname } = useLocation()
+  const { lang } = useLanguage()
+  const t = shared[lang].nav
+
+  const links = [
+    { to: '/', label: t.home },
+    { to: '/about', label: t.about },
+    { label: t.services, dropdown: [
+      { to: '/services', label: t.servicesOverview },
+      { to: '/insurances', label: t.insurances },
+    ] },
+    { label: t.ourTeam, dropdown: [
+      { to: '/founder', label: t.founder },
+      { to: '/team', label: t.team },
+    ] },
+    { to: '/donate', label: t.donate },
+    { to: '/contact', label: t.contact },
+    { to: '/faq', label: t.faq },
+    { to: null, label: t.staffLogin, href: CRM_URL },
+  ]
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
           <img src="/images/logo.png" alt="LifeWay Center" className="h-9 w-9 rounded-lg object-cover" onError={e => { e.target.style.display='none' }} />
           <span className="font-bold text-lw-navy text-lg">LifeWay <span className="text-lw-pink">Center</span></span>
         </Link>
@@ -84,12 +89,16 @@ export default function Navbar() {
               </NavLink>
             )
           })}
-          <Link to="/book" className="btn-primary text-sm py-2 px-4">Book Appointment</Link>
+          <LangToggle />
+          <Link to="/book" className="btn-primary text-sm py-2 px-4">{t.bookAppointment}</Link>
         </nav>
 
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="md:hidden flex items-center gap-3">
+          <LangToggle />
+          <button onClick={() => setOpen(!open)}>
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -147,9 +156,9 @@ export default function Navbar() {
             )
           })}
           <Link to="/book" onClick={() => setOpen(false)} className="btn-primary text-sm py-2 px-4 w-full text-center block">
-            Book Appointment
+            {t.bookAppointment}
           </Link>
-          <a href={CRM_URL} className="block text-xs text-gray-400 text-center pt-1">Staff Login</a>
+          <a href={CRM_URL} className="block text-xs text-gray-400 text-center pt-1">{t.staffLogin}</a>
         </div>
       )}
     </header>

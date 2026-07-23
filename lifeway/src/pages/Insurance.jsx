@@ -1,53 +1,44 @@
 import { Link } from 'react-router-dom'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
+import i18n from '../lib/i18n/insurance'
 
-const columns = [
-  {
-    title: 'Medicaid',
-    sub: 'Managed Medical Assistance (MMA) Plans',
-    plans: [
-      'Aetna Better Health',
-      'Simply Healthcare',
-      'Humana Health Plan',
-      'United Healthcare',
-      'Molina Health Plan',
-      'Community Care Plan',
-      'Florida Community Care',
-    ],
-  },
-  {
-    title: 'Medicare',
-    sub: 'Medicare Advantage Plans',
-    plans: [
-      'Aetna',
-      'Avmed',
-      'Care Plus Health Plan',
-      'Cigna',
-      'HealthSun Health Plan',
-      'Humana Medical Plan',
-      'Medica Healthcare',
-      'Molina Healthcare',
-      'Preferred Care Partners',
-      'Simply Healthcare',
-      'Solis Health Plan',
-    ],
-  },
-  {
-    title: 'Marketplace Plans',
-    plans: [
-      'Oscar',
-      'Aetna CVS',
-      'United',
-      'Amerihealth',
-      'Wellpoint',
-      'Florida Blue / BCBS',
-      'Commercial Plans',
-      'Cigna',
-      'ComPsych',
-      'Tricare',
-      'Healthy Kids',
-    ],
-  },
+const PLANS = [
+  [
+    'Aetna Better Health',
+    'Simply Healthcare',
+    'Humana Health Plan',
+    'United Healthcare',
+    'Molina Health Plan',
+    'Community Care Plan',
+    'Florida Community Care',
+  ],
+  [
+    'Aetna',
+    'Avmed',
+    'Care Plus Health Plan',
+    'Cigna',
+    'HealthSun Health Plan',
+    'Humana Medical Plan',
+    'Medica Healthcare',
+    'Molina Healthcare',
+    'Preferred Care Partners',
+    'Simply Healthcare',
+    'Solis Health Plan',
+  ],
+  [
+    'Oscar',
+    'Aetna CVS',
+    'United',
+    'Amerihealth',
+    'Wellpoint',
+    'Florida Blue / BCBS',
+    'Commercial Plans',
+    'Cigna',
+    'ComPsych',
+    'Tricare',
+    'Healthy Kids',
+  ],
 ]
 
 const logos = [
@@ -63,16 +54,19 @@ const logos = [
 ]
 
 export default function Insurance() {
+  const { lang } = useLanguage()
+  const t = i18n[lang]
+  const columns = t.columns.map((col, i) => ({ ...col, plans: PLANS[i] }))
+
   return (
     <div>
       {/* Header */}
       <section className="bg-lw-navy text-white">
         <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Coverage We Accept</span>
-          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Insurances Accepted</h1>
+          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.eyebrow}</span>
+          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">{t.title}</h1>
           <p className="text-gray-300 max-w-xl mx-auto text-lg leading-relaxed">
-            We work with a wide range of Medicaid, Medicare, and Marketplace plans, and offer cash pay and sliding scale
-            options for everyone else.
+            {t.subtitle}
           </p>
         </div>
       </section>
@@ -98,7 +92,7 @@ export default function Insurance() {
 
         {/* Logo collage */}
         <div className="text-center mb-8">
-          <p className="text-gray-400 text-xs font-semibold uppercase tracking-widest">Some of the Plans We Work With</p>
+          <p className="text-gray-400 text-xs font-semibold uppercase tracking-widest">{t.logosCaption}</p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4 mb-16 max-w-3xl mx-auto">
           {logos.map(logo => (
@@ -115,12 +109,10 @@ export default function Insurance() {
         {/* Note + CTA */}
         <div className="bg-lw-pink-light rounded-3xl p-8 text-center max-w-2xl mx-auto">
           <p className="text-gray-600 leading-relaxed mb-6">
-            Don't see your plan listed, or not sure if your specific coverage is active? Contact us and our team will run an
-            insurance eligibility check for you before your visit. We also accept cash pay and offer sliding scale fees and
-            scholarships, so cost is never a barrier to care.
+            {t.noteBody}
           </p>
           <Link to="/contact" className="btn-primary inline-flex items-center gap-2">
-            Check My Insurance Eligibility <ArrowRight size={16} />
+            {t.checkEligibility} <ArrowRight size={16} />
           </Link>
         </div>
       </section>

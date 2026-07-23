@@ -1,0 +1,186 @@
+export default {
+  en: {
+    legal: 'Legal',
+    title: 'Privacy Policy',
+    effectiveDate: 'Effective Date:',
+    intro: (org) => `${org} ("LifeWay Center," "we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard information when you visit our website, use our online booking system, or interact with our services. If you are a current or prospective patient, please also review our`,
+    introLink: 'HIPAA Notice of Privacy Practices',
+    introAfter: 'which governs the use of your Protected Health Information.',
+    sections: {
+      s1: {
+        title: '1. Information We Collect',
+        directProvide: 'Information you provide directly:',
+        directItems: [
+          'Contact form submissions, name, email address, phone number, and message content',
+          'Appointment booking, name, contact details, service type, preferred provider, and scheduling preferences',
+          'Intake forms, health history and information necessary to provide care (governed by HIPAA)',
+          'Donation forms, name, email, and payment information (processed securely by Stripe)',
+        ],
+        autoCollect: 'Information collected automatically:',
+        autoItems: [
+          'Browser type, operating system, and device information',
+          'IP address and general geographic region',
+          'Pages visited and time spent on the site',
+          'Referring website or link',
+        ],
+        noCookies: 'We do not use tracking cookies or third-party advertising networks.',
+      },
+      s2: {
+        title: '2. How We Use Your Information',
+        intro: 'We use the information we collect solely to:',
+        items: [
+          'Schedule and confirm appointments',
+          'Communicate with you about your care or inquiries',
+          'Send appointment reminders via email or SMS (with your consent)',
+          'Process donations securely',
+          'Improve our website and services',
+          'Comply with legal and regulatory obligations',
+        ],
+        noSell: 'We do not sell, rent, or trade your personal information to any third party for marketing purposes.',
+      },
+      s3: {
+        title: '3. Third-Party Services',
+        intro: 'We use the following third-party services to operate our platform. Each has their own privacy policy:',
+        items: [
+          { name: 'Stripe', desc: 'Payment processing for donations and service fees. Stripe handles all payment card data; we never store card numbers.', linkLabel: 'Stripe Privacy Policy', href: 'https://stripe.com/privacy' },
+          { name: 'Google Meet', desc: "Telehealth video appointments are conducted via Google Meet, governed by Google's privacy policy.", linkLabel: 'Google Privacy Policy', href: 'https://policies.google.com/privacy' },
+          { name: 'Twilio', desc: 'SMS appointment reminders. Message and data rates may apply.', linkLabel: null, href: null },
+          { name: 'Google', desc: "Calendar integration for scheduling. Governed by Google's privacy policy.", linkLabel: null, href: null },
+        ],
+      },
+      s4: {
+        title: '4. Health Information (HIPAA)',
+        before: 'If you are a patient or prospective patient, any health information you share with us, including information submitted through our booking or intake forms, is considered Protected Health Information (PHI) and is governed by the Health Insurance Portability and Accountability Act (HIPAA). Please review our',
+        linkLabel: 'HIPAA Notice of Privacy Practices',
+        after: 'for a full description of your rights and our obligations.',
+      },
+      s5: {
+        title: '5. Data Retention',
+        body: 'We retain personal contact information (such as contact form submissions) for up to 24 months, after which it is securely deleted. Patient health records are retained in accordance with HIPAA requirements (minimum 6 years from the date of creation or last use) and applicable Florida state law. Financial transaction records are retained as required by tax and accounting law.',
+      },
+      s6: {
+        title: '6. Data Security',
+        body: 'We implement industry-standard security measures to protect your information, including encrypted data transmission (HTTPS), access controls, and audit logging for all PHI access. No method of electronic transmission is 100% secure, and we cannot guarantee absolute security. In the event of a data breach affecting your information, we will notify you as required by law.',
+      },
+      s7: {
+        title: "7. Children's Privacy",
+        body: 'Our website is not directed to children under 13. We do not knowingly collect personal information from children under 13 without verifiable parental consent. If you believe a child under 13 has provided us with personal information, please contact us immediately. For minor patients receiving services, a parent or legal guardian must provide consent.',
+      },
+      s8: {
+        title: '8. Your Rights',
+        intro: 'Depending on your location, you may have the right to:',
+        items: [
+          'Request access to the personal information we hold about you',
+          'Request correction of inaccurate information',
+          'Request deletion of your personal data (subject to legal retention requirements)',
+          'Opt out of SMS communications at any time by replying STOP',
+          'Withdraw consent for non-essential communications',
+        ],
+        footer: 'To exercise any of these rights, contact us at the information below. Patient rights regarding PHI are described in our HIPAA Notice.',
+      },
+      s9: {
+        title: '9. Changes to This Policy',
+        body: 'We may update this Privacy Policy from time to time. When we do, we will update the effective date at the top of this page. We encourage you to review this policy periodically. Continued use of our website after changes are posted constitutes acceptance of the updated policy.',
+      },
+      s10: {
+        title: '10. Contact Us',
+        intro: 'If you have questions or concerns about this Privacy Policy, please contact us:',
+        phoneLabel: 'Phone:',
+        sendMessage: 'Send us a message →',
+      },
+    },
+    disclaimer: 'This policy is provided for informational purposes. LifeWay Center recommends consulting with a qualified healthcare compliance attorney to ensure full regulatory compliance for your specific situation.',
+  },
+  es: {
+    legal: 'Legal',
+    title: 'Política de Privacidad',
+    effectiveDate: 'Fecha de Vigencia:',
+    intro: (org) => `${org} ("LifeWay Center", "nosotros" o "nuestro") se compromete a proteger su privacidad. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos la información cuando visita nuestro sitio web, utiliza nuestro sistema de reservas en línea o interactúa con nuestros servicios. Si es un paciente actual o potencial, revise también nuestro`,
+    introLink: 'Aviso de Prácticas de Privacidad de HIPAA',
+    introAfter: 'que rige el uso de su Información de Salud Protegida.',
+    sections: {
+      s1: {
+        title: '1. Información que Recopilamos',
+        directProvide: 'Información que usted proporciona directamente:',
+        directItems: [
+          'Envíos del formulario de contacto, nombre, correo electrónico, número de teléfono y contenido del mensaje',
+          'Reserva de citas, nombre, datos de contacto, tipo de servicio, proveedor preferido y preferencias de horario',
+          'Formularios de admisión, historial de salud e información necesaria para brindar atención (regido por HIPAA)',
+          'Formularios de donación, nombre, correo electrónico e información de pago (procesada de forma segura por Stripe)',
+        ],
+        autoCollect: 'Información recopilada automáticamente:',
+        autoItems: [
+          'Tipo de navegador, sistema operativo e información del dispositivo',
+          'Dirección IP y región geográfica general',
+          'Páginas visitadas y tiempo pasado en el sitio',
+          'Sitio web o enlace de referencia',
+        ],
+        noCookies: 'No utilizamos cookies de seguimiento ni redes publicitarias de terceros.',
+      },
+      s2: {
+        title: '2. Cómo Usamos Su Información',
+        intro: 'Usamos la información que recopilamos únicamente para:',
+        items: [
+          'Programar y confirmar citas',
+          'Comunicarnos con usted sobre su atención o consultas',
+          'Enviar recordatorios de citas por correo electrónico o SMS (con su consentimiento)',
+          'Procesar donaciones de forma segura',
+          'Mejorar nuestro sitio web y servicios',
+          'Cumplir con obligaciones legales y regulatorias',
+        ],
+        noSell: 'No vendemos, alquilamos ni intercambiamos su información personal con terceros con fines de marketing.',
+      },
+      s3: {
+        title: '3. Servicios de Terceros',
+        intro: 'Utilizamos los siguientes servicios de terceros para operar nuestra plataforma. Cada uno tiene su propia política de privacidad:',
+        items: [
+          { name: 'Stripe', desc: 'Procesamiento de pagos para donaciones y tarifas de servicio. Stripe maneja todos los datos de tarjetas de pago; nunca almacenamos números de tarjeta.', linkLabel: 'Política de Privacidad de Stripe', href: 'https://stripe.com/privacy' },
+          { name: 'Google Meet', desc: 'Las citas de telesalud por video se realizan a través de Google Meet, regido por la política de privacidad de Google.', linkLabel: 'Política de Privacidad de Google', href: 'https://policies.google.com/privacy' },
+          { name: 'Twilio', desc: 'Recordatorios de citas por SMS. Pueden aplicarse tarifas de mensajes y datos.', linkLabel: null, href: null },
+          { name: 'Google', desc: 'Integración de calendario para programación. Regido por la política de privacidad de Google.', linkLabel: null, href: null },
+        ],
+      },
+      s4: {
+        title: '4. Información de Salud (HIPAA)',
+        before: 'Si usted es un paciente o paciente potencial, cualquier información de salud que comparta con nosotros, incluyendo información enviada a través de nuestros formularios de reserva o admisión, se considera Información de Salud Protegida (PHI) y está regida por la Ley de Portabilidad y Responsabilidad de Seguros Médicos (HIPAA). Por favor revise nuestro',
+        linkLabel: 'Aviso de Prácticas de Privacidad de HIPAA',
+        after: 'para una descripción completa de sus derechos y nuestras obligaciones.',
+      },
+      s5: {
+        title: '5. Retención de Datos',
+        body: 'Retenemos la información de contacto personal (como los envíos del formulario de contacto) por hasta 24 meses, después de lo cual se elimina de forma segura. Los registros de salud del paciente se retienen de acuerdo con los requisitos de HIPAA (mínimo 6 años desde la fecha de creación o último uso) y la ley estatal de Florida aplicable. Los registros de transacciones financieras se retienen según lo requerido por la ley fiscal y contable.',
+      },
+      s6: {
+        title: '6. Seguridad de Datos',
+        body: 'Implementamos medidas de seguridad estándar de la industria para proteger su información, incluyendo transmisión de datos encriptada (HTTPS), controles de acceso y registro de auditoría para todo acceso a PHI. Ningún método de transmisión electrónica es 100% seguro, y no podemos garantizar seguridad absoluta. En caso de una violación de datos que afecte su información, le notificaremos según lo requerido por la ley.',
+      },
+      s7: {
+        title: '7. Privacidad de los Niños',
+        body: 'Nuestro sitio web no está dirigido a niños menores de 13 años. No recopilamos conscientemente información personal de niños menores de 13 años sin el consentimiento verificable de los padres. Si cree que un niño menor de 13 años nos ha proporcionado información personal, contáctenos de inmediato. Para pacientes menores que reciben servicios, un padre o tutor legal debe dar su consentimiento.',
+      },
+      s8: {
+        title: '8. Sus Derechos',
+        intro: 'Dependiendo de su ubicación, puede tener el derecho de:',
+        items: [
+          'Solicitar acceso a la información personal que tenemos sobre usted',
+          'Solicitar la corrección de información inexacta',
+          'Solicitar la eliminación de sus datos personales (sujeto a requisitos legales de retención)',
+          'Optar por no recibir comunicaciones por SMS en cualquier momento respondiendo STOP',
+          'Retirar el consentimiento para comunicaciones no esenciales',
+        ],
+        footer: 'Para ejercer cualquiera de estos derechos, contáctenos con la información a continuación. Los derechos del paciente respecto a la PHI se describen en nuestro Aviso de HIPAA.',
+      },
+      s9: {
+        title: '9. Cambios a Esta Política',
+        body: 'Podemos actualizar esta Política de Privacidad de vez en cuando. Cuando lo hagamos, actualizaremos la fecha de vigencia en la parte superior de esta página. Le recomendamos revisar esta política periódicamente. El uso continuo de nuestro sitio web después de que se publiquen los cambios constituye la aceptación de la política actualizada.',
+      },
+      s10: {
+        title: '10. Contáctenos',
+        intro: 'Si tiene preguntas o inquietudes sobre esta Política de Privacidad, contáctenos:',
+        phoneLabel: 'Teléfono:',
+        sendMessage: 'Envíenos un mensaje →',
+      },
+    },
+    disclaimer: 'Esta política se proporciona con fines informativos. LifeWay Center recomienda consultar con un abogado calificado en cumplimiento de atención médica para garantizar el cumplimiento regulatorio completo para su situación específica.',
+  },
+}

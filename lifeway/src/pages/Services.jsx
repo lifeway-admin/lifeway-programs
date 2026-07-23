@@ -2,104 +2,29 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, CheckCircle, Brain, Activity, Shield, Heart, Users, Sparkles } from 'lucide-react'
 import { fadeUp } from '../lib/animations'
+import { useLanguage } from '../context/LanguageContext'
+import i18n from '../lib/i18n/services'
 
-const services = [
-  {
-    icon: Brain,
-    title: 'Mental Health Counseling',
-    desc: 'Compassionate, evidence-based therapy for children, teens, and adults, rooted in both clinical expertise and faith.',
-    items: [
-      'Individual Therapy (Children, Teens, Adults)',
-      'Family & Couples Counseling',
-      'Pre-Engagement & Pre-Marital Therapy',
-      'Christian Counseling & Inner Healing',
-      'Grief & Trauma Therapy',
-      'Parenting Support',
-      "Men's & Women's Support Groups",
-      'Group Therapy',
-    ],
-  },
-  {
-    icon: Activity,
-    title: 'Psychiatry & Case Management',
-    desc: 'Comprehensive psychiatric and care coordination services to support your mental and overall health.',
-    items: [
-      'Psychiatric Evaluations',
-      'Medication Management',
-      'ARNP Services for Adults',
-      'Case Management (housing, finances, medical)',
-      'Community Referral Services',
-    ],
-  },
-  {
-    icon: Shield,
-    title: 'Addiction Recovery & Dual Diagnosis',
-    desc: 'Structured outpatient programs with clinical and spiritual support for lasting recovery.',
-    items: [
-      'Individual Outpatient Substance Abuse Counseling',
-      'Intensive Outpatient Program (IOP), 9+ hrs/week',
-      '12-Step Program Referrals (AA, NA, Al-Anon)',
-      'Co-Occurring Mental Health & Substance Use Support',
-      'Relapse Prevention',
-    ],
-  },
-  {
-    icon: Heart,
-    title: 'Medical & Integrative Wellness',
-    desc: 'Primary care and integrative wellness services addressing your full physical health.',
-    items: [
-      'Walk-In Non-Emergency Sick Visits (Homestead)',
-      'Lab Testing & Preventive Health',
-      'Wellness Planning & Nutrition Coaching',
-      'Male & Female Pelvic Exams (by consent)',
-      'Telehealth Medical Consultations',
-      'IV Wellness Therapy',
-    ],
-  },
-  {
-    icon: Users,
-    title: 'Social Services & Case Management',
-    desc: 'Connecting you to the resources, support systems, and services you need to thrive.',
-    items: [
-      'Food Support & Distribution',
-      'Housing Assistance & Navigation',
-      'Utility Assistance Programs',
-      'Employment Support & Referrals',
-      'Benefits Enrollment',
-      'Community Resource Referrals',
-    ],
-  },
-  {
-    icon: Sparkles,
-    title: 'Spiritual Care & Support',
-    desc: 'Faith-based healing that honors the whole person, spirit, soul, and body.',
-    items: [
-      'Christian Counseling & Inner Healing',
-      'Spiritual Assessment & Support',
-      'Prayer & Pastoral Care',
-      'Faith-Based Support Groups',
-      'Psychosocial Rehabilitation',
-      'Life Skills & Independent Living Support',
-    ],
-  },
-]
-
-const insurance = ['Medicaid', 'Medicare', 'Blue Cross', 'Aetna', 'United Health', 'Cigna', 'Humana', 'Self-Pay / Sliding Scale']
+const SERVICE_ICONS = [Brain, Activity, Shield, Heart, Users, Sparkles]
 
 export default function Services() {
+  const { lang } = useLanguage()
+  const t = i18n[lang]
+  const services = t.services.map((s, i) => ({ ...s, icon: SERVICE_ICONS[i] }))
+
   return (
     <div>
       {/* Header */}
       <section className="relative bg-lw-navy text-white overflow-hidden">
         <div className="absolute inset-0 bg-noise pointer-events-none" />
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Comprehensive Holistic Care</span>
-          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Our Services</h1>
+          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.eyebrow}</span>
+          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">{t.title}</h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed">
-            We offer a full spectrum of mental health, medical, social, and spiritual services, accessible and affordable, because dignity should never have a price tag.
+            {t.subtitle}
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
-            {['Mental Health', 'Medical', 'Wellness', 'Social Services', 'Spiritual Care', 'Addiction Recovery'].map(tag => (
+            {t.tags.map(tag => (
               <span key={tag} className="bg-white/10 text-sm px-4 py-2 rounded-full text-gray-200">{tag}</span>
             ))}
           </div>
@@ -111,7 +36,7 @@ export default function Services() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {services.map((s, i) => (
             <motion.div
-              key={s.title}
+              key={s.key}
               className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col"
               initial="hidden"
               whileInView="show"
@@ -147,14 +72,14 @@ export default function Services() {
           <div className="absolute inset-0 bg-noise pointer-events-none" />
           <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Psychosocial Rehabilitation</span>
-              <h2 className="text-2xl font-bold mt-2 mb-4">Building Skills for Independent Living</h2>
+              <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.rehabEyebrow}</span>
+              <h2 className="text-2xl font-bold mt-2 mb-4">{t.rehabTitle}</h2>
               <p className="text-gray-300 leading-relaxed">
-                Our psychosocial rehabilitation program helps individuals develop life skills, integrate into the community, and work toward vocational goals, all with clinical guidance and compassionate support.
+                {t.rehabBody}
               </p>
             </div>
             <ul className="space-y-3">
-              {['Life Skills & Independent Living Support', 'Community Integration', 'Vocational Referrals', 'Behavioral Health Education', 'Relapse Prevention'].map(item => (
+              {t.rehabItems.map(item => (
                 <li key={item} className="flex items-center gap-3 text-gray-200 text-sm">
                   <div className="w-2 h-2 rounded-full bg-lw-pink flex-shrink-0" />
                   {item}
@@ -172,14 +97,14 @@ export default function Services() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Payment & Insurance</span>
-          <h2 className="text-3xl font-bold text-lw-navy mt-2 mb-4">We Accept Most Insurance Plans</h2>
+          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.insuranceEyebrow}</span>
+          <h2 className="text-3xl font-bold text-lw-navy mt-2 mb-4">{t.insuranceTitle}</h2>
           <p className="text-gray-500 max-w-xl mx-auto mb-8">
-            We accept Medicaid, Medicare, and select private insurance. Sliding scale fees, scholarships, and cash pay options are available so cost is never a barrier to care. Not sure if your plan is active or accepted?{' '}
-            <Link to="/contact" className="text-lw-pink font-semibold hover:underline">Contact us</Link> and we'll run an insurance eligibility check for you.
+            {t.insuranceBody1}{' '}
+            <Link to="/contact" className="text-lw-pink font-semibold hover:underline">{t.contactUs}</Link> {t.insuranceBody2}
           </p>
           <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto mb-10">
-            {insurance.map(ins => (
+            {t.insuranceList.map(ins => (
               <div key={ins} className="bg-lw-pink-light border border-pink-100 rounded-lg px-5 py-2.5 text-sm font-medium text-lw-navy">
                 {ins}
               </div>
@@ -187,10 +112,10 @@ export default function Services() {
           </div>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/book" className="btn-primary inline-flex items-center gap-2">
-              Book an Appointment <ArrowRight size={16} />
+              {t.bookAppointment} <ArrowRight size={16} />
             </Link>
             <Link to="/insurances" className="btn-outline inline-flex items-center gap-2">
-              See Full List of Accepted Plans <ArrowRight size={16} />
+              {t.seeFullList} <ArrowRight size={16} />
             </Link>
           </div>
         </motion.div>

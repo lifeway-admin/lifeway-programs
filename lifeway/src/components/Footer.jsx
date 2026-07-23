@@ -1,7 +1,12 @@
 import { Link } from 'react-router-dom'
 import { Phone, MapPin, Clock, Mail } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
+import shared from '../lib/i18n/shared'
 
 export default function Footer() {
+  const { lang } = useLanguage()
+  const t = shared[lang]
+
   return (
     <footer className="bg-lw-navy text-white">
       <div className="max-w-6xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -10,13 +15,13 @@ export default function Footer() {
             <img src="/images/logo.png" alt="LifeWay Center" className="h-9 w-auto" onError={e => { e.target.style.display='none' }} />
             <div>
               <p className="font-bold text-lg leading-tight">LifeWay Center</p>
-              <p className="text-lw-pink text-xs font-semibold uppercase tracking-wider">Christian Holistic Care</p>
+              <p className="text-lw-pink text-xs font-semibold uppercase tracking-wider">{t.footer.tagline}</p>
             </div>
           </div>
           <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-5">
-            A faith-based 501(c)(3) nonprofit committed to offering accessible therapeutic, wellness, and social service support to individuals and families in need. Healing, hope, and dignity, for all.
+            {t.footer.blurb}
           </p>
-          <p className="text-gray-500 text-xs italic mb-5">"Linking Individuals to Their Soaring Potential", Isaiah 40:31</p>
+          <p className="text-gray-500 text-xs italic mb-5">{t.footer.quote}</p>
           <div className="flex gap-3">
             <a href="https://instagram.com/lifewaycenter_org" target="_blank" rel="noreferrer"
               className="flex items-center gap-2 bg-white/10 hover:bg-lw-pink px-3 py-2 rounded-lg transition-colors text-xs font-semibold">
@@ -26,9 +31,9 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Quick Links</h4>
+          <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">{t.footer.quickLinks}</h4>
           <ul className="space-y-2.5">
-            {[['/', 'Home'], ['/about', 'About Us'], ['/services', 'Services'], ['/team', 'Our Team'], ['/donate', 'Donate'], ['/contact', 'Contact'], ['/faq', 'FAQ']].map(([to, label]) => (
+            {[['/', t.nav.home], ['/about', t.nav.about], ['/services', t.nav.services], ['/team', t.nav.team], ['/donate', t.nav.donate], ['/contact', t.nav.contact], ['/faq', t.nav.faq]].map(([to, label]) => (
               <li key={to}>
                 <Link to={to} className="text-sm text-gray-300 hover:text-lw-pink transition-colors">{label}</Link>
               </li>
@@ -37,7 +42,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Find Us</h4>
+          <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">{t.footer.findUs}</h4>
           <ul className="space-y-4">
             <li className="flex items-start gap-2.5 text-sm text-gray-300">
               <MapPin size={15} className="text-lw-pink mt-0.5 flex-shrink-0" />
@@ -67,7 +72,7 @@ export default function Footer() {
             </li>
           </ul>
           <Link to="/book" className="mt-6 btn-primary text-sm py-2.5 px-5 inline-block">
-            Book an Appointment
+            {t.footer.bookAppointment}
           </Link>
         </div>
       </div>
@@ -75,19 +80,19 @@ export default function Footer() {
       {/* Crisis resources */}
       <div className="border-t border-white/10 bg-lw-navy">
         <div className="max-w-6xl mx-auto px-6 py-3 text-center text-xs text-gray-500">
-          <span>In crisis? Call or text <a href="tel:988" className="text-lw-pink font-semibold hover:underline">988</a> (Suicide & Crisis Lifeline), free, confidential, 24/7. For emergencies, call <a href="tel:911" className="text-lw-pink font-semibold hover:underline">911</a>.</span>
+          <span>{t.footer.crisisText} <a href="tel:988" className="text-lw-pink font-semibold hover:underline">988</a> {t.footer.crisisLine} <a href="tel:911" className="text-lw-pink font-semibold hover:underline">911</a>.</span>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <span>© {new Date().getFullYear()} LifeWay Center, Lifeway Programs, Inc. All rights reserved. · 501(c)(3) Nonprofit</span>
+          <span>© {new Date().getFullYear()} LifeWay Center, Lifeway Programs, Inc. {t.footer.rights}</span>
           <div className="flex gap-4">
-            <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
-            <Link to="/hipaa" className="hover:text-gray-300 transition-colors">HIPAA Notice</Link>
+            <Link to="/privacy" className="hover:text-gray-300 transition-colors">{t.footer.privacyPolicy}</Link>
+            <Link to="/hipaa" className="hover:text-gray-300 transition-colors">{t.footer.hipaaNotice}</Link>
             <a href={`${import.meta.env.VITE_CRM_URL || 'http://localhost:5173'}`}
               className="hover:text-gray-300 transition-colors">
-              Staff Login
+              {t.footer.staffLogin}
             </a>
           </div>
         </div>

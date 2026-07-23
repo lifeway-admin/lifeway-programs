@@ -3,51 +3,40 @@ import { motion } from 'framer-motion'
 import { Briefcase, Handshake, GraduationCap, ArrowRight } from 'lucide-react'
 import TeamMemberCard from '../components/TeamMemberCard'
 import { fadeUp } from '../lib/animations'
+import { useLanguage } from '../context/LanguageContext'
+import i18n from '../lib/i18n/team'
 
-const getInvolved = [
-  { icon: Briefcase, title: 'Careers', desc: "Explore open roles across clinical, medical, and support positions, we're always looking for compassionate professionals to join our mission." },
-  { icon: Handshake, title: 'Partnerships', desc: 'Churches, nonprofits, medical partners, and community organizations, let\'s collaborate to expand access to care.' },
-  { icon: GraduationCap, title: 'Internships & Volunteers', desc: 'Gain hands-on experience or give back your time and skills to support our clients and community programs.' },
-]
+const GET_INVOLVED_ICONS = [Briefcase, Handshake, GraduationCap]
 
-const boardOfDirectors = [
-  { name: 'Mayelin Lima', title: 'Board President, Lifeway Programs, Inc.', photo: '/images/team/mayelin-lima.jpg' },
-  { name: 'Laura Dahne', title: 'Board Chairwoman, Lifeway Programs, Inc.', photo: '/images/team/laura-dahne.jpg' },
-  { name: 'Timothy Tyler', title: 'Board Secretary, Lifeway Programs, Inc.', photo: '/images/team/timothy-tyler.jpg' },
-]
+const BOARD_PHOTOS = ['/images/team/mayelin-lima.jpg', '/images/team/laura-dahne.jpg', '/images/team/timothy-tyler.jpg']
+const EXEC_PHOTOS = ['/images/team/mayelin-lima.jpg', '/images/team/jack-hakimian.jpg']
+const DIRECTOR_PHOTOS = ['/images/team/german-alfaro.jpg', '/images/team/maria-reyes.jpg', '/images/team/mayelin-lima.jpg', null]
+const MEDICAL_PHOTOS = ['/images/team/misael-gonzalez.jpg', null, '/images/team/richard-arevalo.jpg', null, '/images/team/yisel-neyra-fajadro.jpg', null]
 
-const executiveTeam = [
-  { name: 'Mayelin Lima', title: 'Founder & Chief Executive Officer', photo: '/images/team/mayelin-lima.jpg' },
-  { name: 'Jack Hakimian', title: 'Chief Growth Officer', photo: '/images/team/jack-hakimian.jpg' },
-]
-
-const directorTeam = [
-  { name: 'German Alfaro', title: 'Clinical Director, LMHC, MS', photo: '/images/team/german-alfaro.jpg' },
-  { name: 'Maria Reyes', title: 'Revenue Cycle Specialist, MHSA', photo: '/images/team/maria-reyes.jpg' },
-  { name: 'Mayelin Lima', title: 'Licensed Clinical Social Worker, President/CEO', photo: '/images/team/mayelin-lima.jpg' },
-  { name: 'Ydania Peralta' },
-]
-
-const medicalTeam = [
-  { name: 'Misael Gonzalez', title: 'Medical Director, M.D.', photo: '/images/team/misael-gonzalez.jpg' },
-  { name: 'Neyma Perez-Suarez' },
-  { name: 'Richard E. Arevalo', title: 'Family Nurse Practitioner, MSN', photo: '/images/team/richard-arevalo.jpg' },
-  { name: 'Sam Moss' },
-  { name: 'Yisel Neyra Fajadro', title: 'MSN, APRN, FNP-C', photo: '/images/team/yisel-neyra-fajadro.jpg' },
-  { name: 'Barbara Mojena' },
-]
+function withPhotos(people, photos) {
+  return people.map((p, i) => ({ ...p, photo: photos[i] }))
+}
 
 export default function Team() {
+  const { lang } = useLanguage()
+  const t = i18n[lang]
+
+  const boardOfDirectors = withPhotos(t.board, BOARD_PHOTOS)
+  const executiveTeam = withPhotos(t.executives, EXEC_PHOTOS)
+  const directorTeam = withPhotos(t.directors, DIRECTOR_PHOTOS)
+  const medicalTeam = withPhotos(t.medical, MEDICAL_PHOTOS)
+  const getInvolved = t.getInvolvedCards.map((g, i) => ({ ...g, icon: GET_INVOLVED_ICONS[i] }))
+
   return (
     <div>
       {/* Header */}
       <section className="relative bg-lw-navy text-white overflow-hidden">
         <div className="absolute inset-0 bg-noise pointer-events-none" />
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">The People Behind Our Mission</span>
-          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Our Team</h1>
+          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.eyebrow}</span>
+          <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">{t.title}</h1>
           <p className="text-gray-300 max-w-xl mx-auto text-lg leading-relaxed">
-            Dedicated professionals who combine clinical excellence with compassion, faith, and a deep commitment to the communities we serve.
+            {t.subtitle}
           </p>
         </div>
       </section>
@@ -61,7 +50,7 @@ export default function Team() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          Board of Directors
+          {t.boardOfDirectors}
         </motion.h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {boardOfDirectors.map((m, i) => (
@@ -79,7 +68,7 @@ export default function Team() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          Executive Team
+          {t.executiveTeam}
         </motion.h2>
         <div className="grid sm:grid-cols-2 gap-6 mb-16 max-w-2xl mx-auto">
           {executiveTeam.map((m, i) => (
@@ -97,7 +86,7 @@ export default function Team() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          Director Team
+          {t.directorTeam}
         </motion.h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {directorTeam.map((m, i) => (
@@ -115,7 +104,7 @@ export default function Team() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          Medical Team
+          {t.medicalTeam}
         </motion.h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {medicalTeam.map((m, i) => (
@@ -133,9 +122,9 @@ export default function Team() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-lw-navy mb-2">Get Involved</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-lw-navy mb-2">{t.getInvolved}</h2>
           <p className="text-gray-500 text-sm max-w-xl mx-auto">
-            Dedicated pages for each of these are coming soon, for now, reach out and we'll point you in the right direction.
+            {t.getInvolvedSub}
           </p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-6 mt-8">
@@ -154,7 +143,7 @@ export default function Team() {
               <h3 className="relative z-10 font-bold text-lg mb-2">{g.title}</h3>
               <p className="relative z-10 text-gray-300 text-sm leading-relaxed mb-6 flex-1">{g.desc}</p>
               <Link to="/contact" className="relative z-10 btn-primary text-sm inline-flex items-center gap-2">
-                Get in Touch <ArrowRight size={14} />
+                {t.getInTouch} <ArrowRight size={14} />
               </Link>
             </motion.div>
           ))}

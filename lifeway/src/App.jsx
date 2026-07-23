@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { LanguageProvider } from './context/LanguageContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import AnnouncementBar from './components/AnnouncementBar'
@@ -21,32 +22,34 @@ import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <PageTitle />
-      <div className="flex flex-col min-h-screen">
-        <AnnouncementBar />
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/insurances" element={<Insurance />} />
-            <Route path="/founder" element={<Founder />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/book" element={<Book />} />
-            <Route path="/donate" element={<Donate />} />
-            <Route path="/faq" element={<Faq />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/hipaa" element={<Hipaa />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-        <MobileCallButton />
-        <ScrollToTop />
-      </div>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <PageTitle />
+        <div className="flex flex-col min-h-screen">
+          <AnnouncementBar />
+          <Navbar />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/insurances" element={<Insurance />} />
+              <Route path="/founder" element={<Founder />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/book" element={<Book />} />
+              <Route path="/donate" element={<Donate />} />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/hipaa" element={<Hipaa />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          <Footer />
+          <MobileCallButton />
+          <ScrollToTop />
+        </div>
+      </BrowserRouter>
+    </LanguageProvider>
   )
 }

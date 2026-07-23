@@ -3,16 +3,13 @@ import { motion } from 'framer-motion'
 import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles, Shield } from 'lucide-react'
 import { TestimonialsColumn } from '../components/ui/testimonials-columns-1'
 import { fadeUp } from '../lib/animations'
+import { useLanguage } from '../context/LanguageContext'
+import i18n from '../lib/i18n/home'
 
-const services = [
-  { icon: Brain, title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more, for children, teens, and adults.' },
-  { icon: Activity, title: 'Medical & Wellness', desc: 'Primary care, preventive health, lab testing, nutrition coaching, and IV wellness therapy. Telehealth available.' },
-  { icon: Users, title: 'Social Services', desc: 'Case management, housing, food support, utility assistance, referrals, and community resources.' },
-  { icon: Briefcase, title: 'Employment Support', desc: 'Job placement, vocational counseling, life skills, and financial coaching to help you build stability.' },
-  { icon: Sparkles, title: 'Spiritual Care', desc: 'Faith-based inner healing, spiritual assessment, pastoral support, and prayer, healing the whole person.' },
-  { icon: Shield, title: 'Addiction Recovery', desc: 'Outpatient and intensive outpatient programs, dual diagnosis support, and 12-step program referrals.' },
-]
+const SERVICE_ICONS = [Brain, Activity, Users, Briefcase, Sparkles, Shield]
+const ACCESS_ICONS = [Calendar, Clock, Phone, Heart]
 
+// Real Google reviews, kept in the reviewer's original words regardless of site language.
 const testimonials = [
   { name: 'Leonardo F.', text: 'From the very first moment we walked in, Kylani made an incredible impression. Outstanding care and service for my whole family.', stars: 5 },
   { name: 'Sandra D.', text: 'Never seen anything like it, my mom got a referral the same day. All staff were nice, respectful, and professional.', stars: 5 },
@@ -22,15 +19,11 @@ const testimonials = [
 
 const testimonialColumns = [testimonials.slice(0, 2), testimonials.slice(2, 4)]
 
-const appointments = [
-  'Health Support',
-  'Mental Health Support',
-  'Spiritual Support',
-  'Resource Support',
-  'IV Wellness Therapy',
-]
-
 export default function Home() {
+  const { lang } = useLanguage()
+  const t = i18n[lang]
+  const services = t.services.map((s, i) => ({ ...s, icon: SERVICE_ICONS[i] }))
+
   return (
     <div>
       {/* Hero */}
@@ -59,37 +52,37 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-flex items-center gap-2 bg-lw-pink/20 text-lw-pink text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider">
-                <Heart size={12} /> Christian Holistic Care · Accessible to All
+                <Heart size={12} /> {t.heroBadge}
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
-                Healing, Hope<br />
-                <span className="text-lw-pink">& Dignity</span>
+                {t.heroTitle1}<br />
+                <span className="text-lw-pink">{t.heroTitle2}</span>
               </h1>
               <p className="text-pink-200 italic text-base mb-6 leading-relaxed max-w-md">
-                "Because healing, hope, and dignity should be within everyone's reach."
+                {t.heroQuote}
               </p>
               <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-lg">
-                You are seen. You are valued. You are not alone. We walk alongside you with compassionate, accessible care, no matter your story, your background, or where you are on your journey.
+                {t.heroBody}
               </p>
               <div className="flex flex-wrap gap-4 mb-8">
                 <Link to="/book" className="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
-                  <Calendar size={16} /> Take the First Step
+                  <Calendar size={16} /> {t.takeFirstStep}
                 </Link>
                 <Link to="/services" className="border-2 border-white/30 text-white px-8 py-3.5 rounded-xl font-semibold hover:border-white transition-colors text-base flex items-center gap-2">
-                  Our Services <ArrowRight size={16} />
+                  {t.ourServices} <ArrowRight size={16} />
                 </Link>
               </div>
               <div className="flex flex-wrap gap-6 text-sm text-gray-400">
-                <span className="flex items-center gap-2"><Clock size={14} className="text-lw-pink" /> Mon–Sat · 9am–9pm</span>
+                <span className="flex items-center gap-2"><Clock size={14} className="text-lw-pink" /> {t.hours}</span>
                 <span className="flex items-center gap-2"><Phone size={14} className="text-lw-pink" /> (888) 331-3060</span>
               </div>
             </div>
 
             {/* Appointment cards */}
             <div className="hidden md:block">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">Appointments Available</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">{t.appointmentsAvailable}</p>
               <div className="space-y-3">
-                {appointments.map(a => (
+                {t.appointments.map(a => (
                   <Link
                     key={a}
                     to="/book"
@@ -97,15 +90,15 @@ export default function Home() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-lw-pink" />
-                      <span className="text-sm font-medium">Receive {a}</span>
+                      <span className="text-sm font-medium">{t.receive} {a}</span>
                     </div>
                     <span className="text-xs text-lw-pink font-semibold bg-lw-pink/20 px-2.5 py-1 rounded-full group-hover:bg-lw-pink/30 transition-colors">
-                      No Waitlist
+                      {t.noWaitlist}
                     </span>
                   </Link>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-4 text-center">Same-day appointments available</p>
+              <p className="text-xs text-gray-500 mt-4 text-center">{t.sameDayAvailable}</p>
             </div>
           </div>
         </div>
@@ -120,12 +113,12 @@ export default function Home() {
       <section className="bg-lw-pink-light text-lw-navy">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
           <p className="font-semibold text-center md:text-left italic">
-            "Linking Individuals to Their Soaring Potential", Inspired by Isaiah 40:31
+            {t.missionQuote}
           </p>
           <div className="flex flex-wrap gap-6 text-lw-navy/70">
             <span className="flex items-center gap-2"><MapPin size={14} className="text-lw-pink" /> Homestead, FL</span>
             <span className="flex items-center gap-2"><MapPin size={14} className="text-lw-pink" /> Riverview, FL</span>
-            <span className="flex items-center gap-2"><span className="font-bold">📱</span> Statewide Telehealth</span>
+            <span className="flex items-center gap-2"><span className="font-bold">📱</span> {t.statewideTelehealth}</span>
           </div>
         </div>
       </section>
@@ -133,16 +126,16 @@ export default function Home() {
       {/* Services */}
       <section className="section">
         <div className="text-center mb-14">
-          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">What We Offer</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-4">Whatever You're Carrying,<br className="hidden md:block" /> We're Here</h2>
+          <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.servicesEyebrow}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-4">{t.servicesTitle}<br className="hidden md:block" /> {t.servicesTitleLine2}</h2>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            From grief and anxiety to housing challenges and addiction recovery, our team wraps around you and your family with real professional care and genuine love.
+            {t.servicesSub}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((s, i) => (
             <motion.div
-              key={s.title}
+              key={s.key}
               className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-gray-50"
               initial="hidden"
               whileInView="show"
@@ -156,7 +149,7 @@ export default function Home() {
               <h3 className="text-lg font-bold text-lw-navy mb-3">{s.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-5">{s.desc}</p>
               <Link to="/services" className="text-lw-pink text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                Learn more <ArrowRight size={14} />
+                {t.learnMore} <ArrowRight size={14} />
               </Link>
             </motion.div>
           ))}
@@ -173,19 +166,13 @@ export default function Home() {
               viewport={{ once: true, amount: 0.3 }}
               variants={fadeUp}
             >
-              <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Why LifeWay Center</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">A Place Where You<br />Truly Belong</h2>
+              <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.whyEyebrow}</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">{t.whyTitle1}<br />{t.whyTitle2}</h2>
               <p className="text-gray-500 leading-relaxed mb-8">
-                We're not just a clinic, we're a community. A Christ-centered family that sees you as a whole person, meets you without judgment, and walks with you every step of the way toward healing and wholeness.
+                {t.whyBody}
               </p>
               <ul className="space-y-3">
-                {[
-                  ['Faith-Based Excellence', 'Clinical skill blended with biblical truth'],
-                  ['Multicultural & Bilingual', 'Services available in English & Spanish'],
-                  ['Holistic & Trauma-Informed', 'Healing the whole person, body, mind & spirit'],
-                  ['Accessible to All', 'Medicaid, insurance, cash pay, sliding scale & scholarships'],
-                  ['Easy to Access', 'Same-day appointments, telehealth & evening sessions'],
-                ].map(([title, desc]) => (
+                {t.whyList.map(([title, desc]) => (
                   <li key={title} className="flex items-start gap-3">
                     <CheckCircle size={18} className="text-lw-pink flex-shrink-0 mt-0.5" />
                     <div>
@@ -196,52 +183,34 @@ export default function Home() {
                 ))}
               </ul>
               <Link to="/about" className="btn-primary mt-8 inline-flex items-center gap-2">
-                Our Story <ArrowRight size={16} />
+                {t.ourStory} <ArrowRight size={16} />
               </Link>
             </motion.div>
 
             {/* Access features */}
             <div className="grid grid-cols-1 gap-4">
-              {[
-                {
-                  icon: Calendar,
-                  title: 'Same-Day Appointments',
-                  desc: 'No long waitlists. We make space for you the moment you reach out, because healing shouldn\'t have to wait.',
-                },
-                {
-                  icon: Clock,
-                  title: 'Monday – Saturday, 9am – 9pm',
-                  desc: 'Evening sessions available so care fits into your life, not the other way around.',
-                },
-                {
-                  icon: Phone,
-                  title: 'Statewide Telehealth',
-                  desc: 'Serving all of Florida from wherever you are, secure video sessions on any device.',
-                },
-                {
-                  icon: Heart,
-                  title: 'Cost Is Never a Barrier',
-                  desc: 'Medicaid, Medicare, private insurance, sliding scale fees, and scholarships, we find a way for everyone.',
-                },
-              ].map((f, i) => (
-                <motion.div
-                  key={f.title}
-                  className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-50 flex items-start gap-4"
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, amount: 0.3 }}
-                  variants={fadeUp}
-                  transition={{ ...fadeUp.show.transition, delay: i * 0.1 }}
-                >
-                  <div className="w-10 h-10 rounded-xl bg-lw-pink-light flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <f.icon size={18} className="text-lw-pink" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-lw-navy text-sm mb-0.5">{f.title}</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {t.accessFeatures.map((f, i) => {
+                const Icon = ACCESS_ICONS[i]
+                return (
+                  <motion.div
+                    key={f.title}
+                    className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-50 flex items-start gap-4"
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={fadeUp}
+                    transition={{ ...fadeUp.show.transition, delay: i * 0.1 }}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-lw-pink-light flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Icon size={18} className="text-lw-pink" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-lw-navy text-sm mb-0.5">{f.title}</p>
+                      <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
+                    </div>
+                  </motion.div>
+                )
+              })}
             </div>
           </div>
         </div>
@@ -260,15 +229,15 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 bg-white rounded-full px-5 py-2.5 shadow-sm mb-6">
               <span className="font-bold text-lg" style={{ background: 'linear-gradient(135deg, #4285F4 25%, #EA4335 25%, #EA4335 50%, #FBBC05 50%, #FBBC05 75%, #34A853 75%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>G</span>
-              <span className="text-gray-700 text-sm font-semibold">Google Reviews</span>
+              <span className="text-gray-700 text-sm font-semibold">{t.googleReviews}</span>
               <span className="text-gray-300">·</span>
               <div className="flex gap-0.5">
                 {[1,2,3,4,5].map(i => <Star key={i} size={13} className="text-yellow-400 fill-yellow-400" />)}
               </div>
               <span className="text-gray-700 text-sm font-bold">5.0</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mb-3">Voices From Our Community</h2>
-            <p className="text-gray-500 max-w-md mx-auto">Real experiences from the people we're honored to walk alongside</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mb-3">{t.testimonialsTitle}</h2>
+            <p className="text-gray-500 max-w-md mx-auto">{t.testimonialsSub}</p>
           </motion.div>
 
           {/* Cards, vertical auto-scrolling columns */}
@@ -284,7 +253,7 @@ export default function Home() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-lw-pink hover:text-lw-pink-dark transition-colors"
             >
-              Read all reviews on Google <ArrowRight size={14} />
+              {t.readAllReviews} <ArrowRight size={14} />
             </a>
           </div>
         </div>
@@ -301,25 +270,25 @@ export default function Home() {
             viewport={{ once: true, amount: 0.3 }}
             variants={fadeUp}
           >
-            <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Find Us</span>
-            <h2 className="text-3xl font-bold mt-2">Come As You Are, We're Close By</h2>
-            <p className="text-gray-400 mt-3 text-sm">Two welcoming locations in South Florida, plus telehealth statewide</p>
+            <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">{t.findUs}</span>
+            <h2 className="text-3xl font-bold mt-2">{t.locationsTitle}</h2>
+            <p className="text-gray-400 mt-3 text-sm">{t.locationsSub}</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8 text-center">
             {[
-              { icon: MapPin, title: 'Homestead, FL', body: <>15300 SW 288th Street<br />Homestead, FL 33033</>, cls: 'bg-white/10 hover:bg-white/15 transition-colors' },
-              { icon: MapPin, title: 'Riverview, FL', body: <>10621 Tucker Jones Rd<br />Riverview, FL 33578</>, cls: 'bg-white/10 hover:bg-white/15 transition-colors' },
+              { title: 'Homestead, FL', body: <>15300 SW 288th Street<br />Homestead, FL 33033</> },
+              { title: 'Riverview, FL', body: <>10621 Tucker Jones Rd<br />Riverview, FL 33578</> },
             ].map((loc, i) => (
               <motion.div
                 key={loc.title}
-                className={`rounded-3xl p-8 ${loc.cls}`}
+                className="rounded-3xl p-8 bg-white/10 hover:bg-white/15 transition-colors"
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.3 }}
                 variants={fadeUp}
                 transition={{ ...fadeUp.show.transition, delay: i * 0.1 }}
               >
-                <loc.icon size={28} className="text-lw-pink mx-auto mb-4" />
+                <MapPin size={28} className="text-lw-pink mx-auto mb-4" />
                 <h3 className="font-bold text-lg mb-2">{loc.title}</h3>
                 <p className="text-gray-300 text-sm">{loc.body}</p>
               </motion.div>
@@ -333,9 +302,9 @@ export default function Home() {
               transition={{ ...fadeUp.show.transition, delay: 0.2 }}
             >
               <Phone size={28} className="text-lw-pink mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Call or Text Us</h3>
+              <h3 className="font-bold text-lg mb-2">{t.callOrText}</h3>
               <a href="tel:8883313060" className="text-lw-pink font-bold text-xl">(888) 331-3060</a>
-              <p className="text-gray-400 text-sm mt-2">Mon–Sat · 9am–9pm</p>
+              <p className="text-gray-400 text-sm mt-2">{t.hours}</p>
             </motion.div>
           </div>
         </div>
@@ -350,19 +319,19 @@ export default function Home() {
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">You Don't Have to Face This Alone</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t.ctaTitle}</h2>
           <p className="text-pink-100 mb-8 text-lg max-w-xl mx-auto leading-relaxed">
-            Taking that first step can feel hard. We promise to make everything after that easy, compassionate, confidential, and accessible.
+            {t.ctaBody}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/book" className="bg-white text-lw-pink font-bold px-8 py-3.5 rounded-xl hover:bg-pink-50 transition-colors flex items-center gap-2">
-              <Calendar size={16} /> Take the First Step
+              <Calendar size={16} /> {t.takeFirstStep}
             </Link>
             <Link to="/contact" className="border-2 border-white text-white font-bold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-colors">
-              Talk to Us First
+              {t.talkToUsFirst}
             </Link>
           </div>
-          <p className="text-pink-200 text-sm mt-6">Same-day appointments available · No insurance required</p>
+          <p className="text-pink-200 text-sm mt-6">{t.ctaFooter}</p>
         </motion.div>
       </section>
     </div>

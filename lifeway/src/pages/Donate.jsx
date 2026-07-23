@@ -1,27 +1,15 @@
 import { useState } from 'react'
 import { Heart, CheckCircle, ExternalLink } from 'lucide-react'
+import { useLanguage } from '../context/LanguageContext'
+import i18n from '../lib/i18n/donate'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const PRESETS = [10, 25, 50, 100, 250]
 
-const CAMPAIGNS = [
-  { value: 'general', label: 'Where Needed Most' },
-  { value: 'mental_health', label: 'Mental Health Programs' },
-  { value: 'medical', label: 'Medical Services' },
-  { value: 'housing', label: 'Housing Assistance' },
-  { value: 'youth', label: 'Youth Programs' },
-]
-
-const IMPACT = [
-  { amount: 10, desc: 'Provides a week of support materials for one client' },
-  { amount: 25, desc: 'Covers one counseling session for an uninsured client' },
-  { amount: 50, desc: 'Funds a month of case management services' },
-  { amount: 100, desc: 'Sponsors a family\'s housing assistance for one week' },
-  { amount: 250, desc: 'Supports a full month of mental health programming' },
-]
-
 export default function Donate() {
+  const { lang } = useLanguage()
+  const t = i18n[lang]
   const [preset, setPreset] = useState(25)
   const [custom, setCustom] = useState('')
   const [name, setName] = useState('')
@@ -33,12 +21,12 @@ export default function Donate() {
 
   const amount = custom ? parseFloat(custom) : preset
   const amountCents = Math.round(amount * 100)
-  const impact = IMPACT.find(i => i.amount === preset)
+  const impact = t.impact.find(i => i.amount === preset)
 
   async function submit(e) {
     e.preventDefault()
     if (!amountCents || amountCents < 100) {
-      setError('Minimum donation is $1.00')
+      setError(t.errorMin)
       return
     }
     setError('')
@@ -58,10 +46,10 @@ export default function Donate() {
       if (data.checkout_url) {
         window.location.href = data.checkout_url
       } else {
-        setError('Something went wrong. Please try again.')
+        setError(t.errorGeneric)
       }
     } catch {
-      setError('Unable to connect. Please try again.')
+      setError(t.errorConnect)
     } finally {
       setLoading(false)
     }
@@ -75,9 +63,9 @@ export default function Donate() {
           <div className="w-14 h-14 rounded-2xl bg-lw-pink flex items-center justify-center mx-auto mb-5">
             <Heart size={26} className="text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-5">Make a Difference</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mt-2 mb-5">{t.title}</h1>
           <p className="text-gray-300 max-w-xl mx-auto text-lg leading-relaxed">
-            Your generosity helps us provide compassionate care to individuals and families who need it most.
+            {t.subtitle}
           </p>
         </div>
       </section>
@@ -86,11 +74,11 @@ export default function Donate() {
         <div className="grid md:grid-cols-2 gap-16 items-start">
           {/* Form */}
           <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-lw-navy mb-6">Choose Your Gift</h2>
+            <h2 className="text-2xl font-bold text-lw-navy mb-6">{t.chooseGift}</h2>
             <form onSubmit={submit} className="space-y-5">
               {/* Amount presets */}
               <div>
-                <label htmlFor="donate-amount" className="block text-sm font-medium text-gray-700 mb-2">Donation Amount</label>
+                <label htmlFor="donate-amount" className="block text-sm font-medium text-gray-700 mb-2">{t.donationAmount}</label>
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   {PRESETS.map(p => (
                     <button
@@ -112,7 +100,7 @@ export default function Donate() {
                   type="number"
                   min="1"
                   step="0.01"
-                  placeholder="Custom amount ($)"
+                  placeholder={t.customAmount}
                   value={custom}
                   onChange={e => { setCustom(e.target.value); setPreset(null) }}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink focus:ring-1 focus:ring-lw-pink"
@@ -124,14 +112,14 @@ export default function Donate() {
 
               {/* Campaign */}
               <div>
-                <label htmlFor="donate-campaign" className="block text-sm font-medium text-gray-700 mb-1.5">Designate My Gift To</label>
+                <label htmlFor="donate-campaign" className="block text-sm font-medium text-gray-700 mb-1.5">{t.designateGift}</label>
                 <select
                   id="donate-campaign"
                   value={campaign}
                   onChange={e => setCampaign(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink"
                 >
-                  {CAMPAIGNS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  {t.campaigns.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
 
@@ -139,23 +127,23 @@ export default function Donate() {
               {!anonymous && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="donate-name" className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                    <label htmlFor="donate-name" className="block text-sm font-medium text-gray-700 mb-1.5">{t.name}</label>
                     <input
                       id="donate-name"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      placeholder="Your name"
+                      placeholder={t.yourName}
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink"
                     />
                   </div>
                   <div>
-                    <label htmlFor="donate-email" className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                    <label htmlFor="donate-email" className="block text-sm font-medium text-gray-700 mb-1.5">{t.email}</label>
                     <input
                       id="donate-email"
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      placeholder="For receipt"
+                      placeholder={t.forReceipt}
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink"
                     />
                   </div>
@@ -164,7 +152,7 @@ export default function Donate() {
 
               <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                 <input type="checkbox" checked={anonymous} onChange={e => setAnonymous(e.target.checked)} className="rounded" />
-                Make my donation anonymous
+                {t.anonymous}
               </label>
 
               {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -175,13 +163,13 @@ export default function Donate() {
                 className="btn-primary w-full flex items-center justify-center gap-2 py-3.5"
               >
                 <Heart size={16} />
-                {loading ? 'Redirecting...' : `Donate $${amount || '—'} Securely`}
+                {loading ? t.redirecting : `${t.donateSecurely} $${amount || '—'} ${t.securely}`}
               </button>
 
               <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
-                <span className="flex items-center gap-1"><ExternalLink size={11} /> Powered by Stripe</span>
-                <span>· Tax-deductible</span>
-                <span>· Secure checkout</span>
+                <span className="flex items-center gap-1"><ExternalLink size={11} /> {t.poweredByStripe}</span>
+                <span>· {t.taxDeductible}</span>
+                <span>· {t.secureCheckout}</span>
               </div>
             </form>
           </div>
@@ -189,14 +177,14 @@ export default function Donate() {
           {/* Why donate */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-2xl font-bold text-lw-navy mb-4">Your Impact</h2>
+              <h2 className="text-2xl font-bold text-lw-navy mb-4">{t.yourImpact}</h2>
               <p className="text-gray-500 leading-relaxed">
-                Every dollar goes directly to programs that change lives. We believe in transparency and stewardship, your gift is used where it matters most.
+                {t.impactBody}
               </p>
             </div>
 
             <div className="space-y-4">
-              {IMPACT.map(i => (
+              {t.impact.map(i => (
                 <div key={i.amount} className="flex gap-4 items-start">
                   <div className="w-14 text-center flex-shrink-0">
                     <span className="text-lw-pink font-bold text-lg">${i.amount}</span>
@@ -210,9 +198,9 @@ export default function Donate() {
             </div>
 
             <div className="bg-lw-navy rounded-2xl p-6 text-white">
-              <h3 className="font-bold mb-2">Tax Deductible</h3>
+              <h3 className="font-bold mb-2">{t.taxDeductibleTitle}</h3>
               <p className="text-gray-300 text-sm leading-relaxed">
-                Lifeway Programs is a registered nonprofit organization. All donations are tax-deductible to the extent provided by law. You will receive a receipt for your records.
+                {t.taxDeductibleBody}
               </p>
             </div>
           </div>
