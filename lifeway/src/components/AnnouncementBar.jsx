@@ -21,7 +21,7 @@ export default function AnnouncementBar() {
         Now accepting new patients · Same-day appointments available
       </span>
       <Link to="/book" className="hidden sm:inline-flex items-center gap-1 bg-lw-pink text-white px-3 py-1 rounded-full font-semibold hover:bg-lw-pink-dark transition-colors">
-        <Calendar size={10} /> Book Free
+        <Calendar size={10} /> Book Now
       </Link>
       <button
         onClick={dismiss}

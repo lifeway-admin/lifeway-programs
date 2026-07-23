@@ -187,7 +187,7 @@ export default function Donate() {
             <div>
               <h2 className="text-2xl font-bold text-lw-navy mb-4">Your Impact</h2>
               <p className="text-gray-500 leading-relaxed">
-                Every dollar goes directly to programs that change lives. We believe in transparency and stewardship — your gift is used where it matters most.
+                Every dollar goes directly to programs that change lives. We believe in transparency and stewardship, your gift is used where it matters most.
               </p>
             </div>
 

@@ -45,10 +45,10 @@ export default function Privacy() {
           <Section title="1. Information We Collect">
             <p><strong className="text-lw-navy">Information you provide directly:</strong></p>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li>Contact form submissions — name, email address, phone number, and message content</li>
-              <li>Appointment booking — name, contact details, service type, preferred provider, and scheduling preferences</li>
-              <li>Intake forms — health history and information necessary to provide care (governed by HIPAA)</li>
-              <li>Donation forms — name, email, and payment information (processed securely by Stripe)</li>
+              <li>Contact form submissions, name, email address, phone number, and message content</li>
+              <li>Appointment booking, name, contact details, service type, preferred provider, and scheduling preferences</li>
+              <li>Intake forms, health history and information necessary to provide care (governed by HIPAA)</li>
+              <li>Donation forms, name, email, and payment information (processed securely by Stripe)</li>
             </ul>
             <p className="mt-3"><strong className="text-lw-navy">Information collected automatically:</strong></p>
             <ul className="list-disc pl-5 space-y-1.5">
@@ -76,17 +76,17 @@ export default function Privacy() {
           <Section title="3. Third-Party Services">
             <p>We use the following third-party services to operate our platform. Each has their own privacy policy:</p>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong className="text-lw-navy">Stripe</strong> — Payment processing for donations and service fees. Stripe handles all payment card data; we never store card numbers. <a href="https://stripe.com/privacy" target="_blank" rel="noreferrer" className="text-lw-pink hover:underline">Stripe Privacy Policy</a></li>
-              <li><strong className="text-lw-navy">Google Meet</strong> — Telehealth video appointments are conducted via Google Meet, governed by Google's privacy policy. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="text-lw-pink hover:underline">Google Privacy Policy</a></li>
-              <li><strong className="text-lw-navy">Twilio</strong> — SMS appointment reminders. Message and data rates may apply.</li>
-              <li><strong className="text-lw-navy">Google</strong> — Calendar integration for scheduling. Governed by Google's privacy policy.</li>
+              <li><strong className="text-lw-navy">Stripe</strong>, Payment processing for donations and service fees. Stripe handles all payment card data; we never store card numbers. <a href="https://stripe.com/privacy" target="_blank" rel="noreferrer" className="text-lw-pink hover:underline">Stripe Privacy Policy</a></li>
+              <li><strong className="text-lw-navy">Google Meet</strong>, Telehealth video appointments are conducted via Google Meet, governed by Google's privacy policy. <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer" className="text-lw-pink hover:underline">Google Privacy Policy</a></li>
+              <li><strong className="text-lw-navy">Twilio</strong>, SMS appointment reminders. Message and data rates may apply.</li>
+              <li><strong className="text-lw-navy">Google</strong>, Calendar integration for scheduling. Governed by Google's privacy policy.</li>
             </ul>
           </Section>
 
           <Section title="4. Health Information (HIPAA)">
             <p>
-              If you are a patient or prospective patient, any health information you share with us —
-              including information submitted through our booking or intake forms — is considered Protected
+              If you are a patient or prospective patient, any health information you share with us,
+              including information submitted through our booking or intake forms, is considered Protected
               Health Information (PHI) and is governed by the Health Insurance Portability and Accountability
               Act (HIPAA). Please review our{' '}
               <Link to="/hipaa" className="text-lw-pink font-semibold hover:underline">HIPAA Notice of Privacy Practices</Link>{' '}

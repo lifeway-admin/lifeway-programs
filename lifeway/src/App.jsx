@@ -8,6 +8,8 @@ import PageTitle from './components/PageTitle'
 import Home from './pages/Home'
 import About from './pages/About'
 import Services from './pages/Services'
+import Insurance from './pages/Insurance'
+import Founder from './pages/Founder'
 import Team from './pages/Team'
 import Contact from './pages/Contact'
 import Book from './pages/Book'
@@ -29,6 +31,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/insurances" element={<Insurance />} />
+            <Route path="/founder" element={<Founder />} />
             <Route path="/team" element={<Team />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/book" element={<Book />} />

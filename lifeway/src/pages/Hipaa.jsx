@@ -50,7 +50,7 @@ export default function Hipaa() {
           <Section title="1. What is Protected Health Information (PHI)?">
             <p>
               PHI is any information we create or receive about your past, present, or future physical or
-              mental health condition; the provision of health care to you; or payment for that care —
+              mental health condition; the provision of health care to you; or payment for that care,
               that can be used to identify you. This includes your name, address, date of birth, diagnosis,
               treatment records, and payment information.
             </p>
@@ -219,7 +219,7 @@ export default function Hipaa() {
               For questions about this Notice or to exercise any of your rights, please contact:
             </p>
             <div className="bg-white border border-gray-100 rounded-xl p-5 mt-3">
-              <p className="font-semibold text-lw-navy">{ORG} — Privacy Officer</p>
+              <p className="font-semibold text-lw-navy">{ORG}, Privacy Officer</p>
               <p>{ADDRESS}</p>
               <p>Phone: <a href="tel:8883313060" className="text-lw-pink hover:underline">{PHONE}</a></p>
               <p className="mt-2">

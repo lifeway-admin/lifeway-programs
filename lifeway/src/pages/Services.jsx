@@ -5,7 +5,7 @@ const services = [
   {
     icon: Brain,
     title: 'Mental Health Counseling',
-    desc: 'Compassionate, evidence-based therapy for children, teens, and adults — rooted in both clinical expertise and faith.',
+    desc: 'Compassionate, evidence-based therapy for children, teens, and adults, rooted in both clinical expertise and faith.',
     items: [
       'Individual Therapy (Children, Teens, Adults)',
       'Family & Couples Counseling',
@@ -35,7 +35,7 @@ const services = [
     desc: 'Structured outpatient programs with clinical and spiritual support for lasting recovery.',
     items: [
       'Individual Outpatient Substance Abuse Counseling',
-      'Intensive Outpatient Program (IOP) – 9+ hrs/week',
+      'Intensive Outpatient Program (IOP), 9+ hrs/week',
       '12-Step Program Referrals (AA, NA, Al-Anon)',
       'Co-Occurring Mental Health & Substance Use Support',
       'Relapse Prevention',
@@ -70,7 +70,7 @@ const services = [
   {
     icon: Sparkles,
     title: 'Spiritual Care & Support',
-    desc: 'Faith-based healing that honors the whole person — spirit, soul, and body.',
+    desc: 'Faith-based healing that honors the whole person, spirit, soul, and body.',
     items: [
       'Christian Counseling & Inner Healing',
       'Spiritual Assessment & Support',
@@ -93,7 +93,7 @@ export default function Services() {
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Comprehensive Holistic Care</span>
           <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Our Services</h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed">
-            We offer a full spectrum of mental health, medical, social, and spiritual services — all free or low-cost, because dignity should never have a price tag.
+            We offer a full spectrum of mental health, medical, social, and spiritual services, accessible and affordable, because dignity should never have a price tag.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             {['Mental Health', 'Medical', 'Wellness', 'Social Services', 'Spiritual Care', 'Addiction Recovery'].map(tag => (
@@ -132,7 +132,7 @@ export default function Services() {
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Psychosocial Rehabilitation</span>
               <h2 className="text-2xl font-bold mt-2 mb-4">Building Skills for Independent Living</h2>
               <p className="text-gray-300 leading-relaxed">
-                Our psychosocial rehabilitation program helps individuals develop life skills, integrate into the community, and work toward vocational goals — all with clinical guidance and compassionate support.
+                Our psychosocial rehabilitation program helps individuals develop life skills, integrate into the community, and work toward vocational goals, all with clinical guidance and compassionate support.
               </p>
             </div>
             <ul className="space-y-3">
@@ -151,7 +151,8 @@ export default function Services() {
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Payment & Insurance</span>
           <h2 className="text-3xl font-bold text-lw-navy mt-2 mb-4">We Accept Most Insurance Plans</h2>
           <p className="text-gray-500 max-w-xl mx-auto mb-8">
-            We accept Medicaid, Medicare, and select private insurance. Sliding scale fees, scholarships, and cash pay options are available so cost is never a barrier to care.
+            We accept Medicaid, Medicare, and select private insurance. Sliding scale fees, scholarships, and cash pay options are available so cost is never a barrier to care. Not sure if your plan is active or accepted?{' '}
+            <Link to="/contact" className="text-lw-pink font-semibold hover:underline">Contact us</Link> and we'll run an insurance eligibility check for you.
           </p>
           <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto mb-10">
             {insurance.map(ins => (
@@ -160,9 +161,14 @@ export default function Services() {
               </div>
             ))}
           </div>
-          <Link to="/book" className="btn-primary inline-flex items-center gap-2">
-            Book Free Appointment <ArrowRight size={16} />
-          </Link>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/book" className="btn-primary inline-flex items-center gap-2">
+              Book an Appointment <ArrowRight size={16} />
+            </Link>
+            <Link to="/insurances" className="btn-outline inline-flex items-center gap-2">
+              See Full List of Accepted Plans <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

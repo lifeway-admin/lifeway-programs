@@ -1,26 +1,38 @@
 import { Link } from 'react-router-dom'
-import { Mail, ArrowRight } from 'lucide-react'
+import { Briefcase, Handshake, GraduationCap, ArrowRight } from 'lucide-react'
+import TeamMemberCard from '../components/TeamMemberCard'
 
-const team = [
-  {
-    name: 'Mayelin Lima',
-    credentials: 'LCSW',
-    title: 'Founder & Executive Director',
-    dept: 'Leadership',
-    bio: 'With over 20 years of clinical and community health experience, Mayelin leads LifeWay Center with humility and bold faith. Bilingual and deeply compassionate, she believes that every soul we serve carries divine potential waiting to be unlocked.',
-    initials: 'ML',
-  },
+const getInvolved = [
+  { icon: Briefcase, title: 'Careers', desc: "Explore open roles across clinical, medical, and support positions, we're always looking for compassionate professionals to join our mission." },
+  { icon: Handshake, title: 'Partnerships', desc: 'Churches, nonprofits, medical partners, and community organizations, let\'s collaborate to expand access to care.' },
+  { icon: GraduationCap, title: 'Internships & Volunteers', desc: 'Gain hands-on experience or give back your time and skills to support our clients and community programs.' },
 ]
 
-const roles = [
-  'Licensed Clinical Social Workers (LCSW)',
-  'Licensed Mental Health Counselors (LMHC)',
-  'Psychiatrists & ARNPs',
-  'Case Managers',
-  'Addiction Recovery Specialists',
-  'Peer Support Specialists',
-  'Bilingual Counselors (English/Spanish)',
-  'Community Health Workers',
+const boardOfDirectors = [
+  { name: 'Mayelin Lima', title: 'Board President, Lifeway Programs, Inc.', photo: '/images/team/mayelin-lima.jpg' },
+  { name: 'Laura Dahne', title: 'Board Chairwoman, Lifeway Programs, Inc.', photo: '/images/team/laura-dahne.jpg' },
+  { name: 'Timothy Tyler', title: 'Board Secretary, Lifeway Programs, Inc.', photo: '/images/team/timothy-tyler.jpg' },
+]
+
+const executiveTeam = [
+  { name: 'Mayelin Lima', title: 'Founder & Chief Executive Officer', photo: '/images/team/mayelin-lima.jpg' },
+  { name: 'Jack Hakimian', title: 'Chief Growth Officer', photo: '/images/team/jack-hakimian.jpg' },
+]
+
+const directorTeam = [
+  { name: 'German Alfaro', title: 'Clinical Director, LMHC, MS', photo: '/images/team/german-alfaro.jpg' },
+  { name: 'Maria Reyes', title: 'Revenue Cycle Specialist, MHSA', photo: '/images/team/maria-reyes.jpg' },
+  { name: 'Mayelin Lima', title: 'Licensed Clinical Social Worker, President/CEO', photo: '/images/team/mayelin-lima.jpg' },
+  { name: 'Ydania Peralta' },
+]
+
+const medicalTeam = [
+  { name: 'Misael Gonzalez', title: 'Medical Director, M.D.', photo: '/images/team/misael-gonzalez.jpg' },
+  { name: 'Neyma Perez-Suarez' },
+  { name: 'Richard E. Arevalo', title: 'Family Nurse Practitioner, MSN', photo: '/images/team/richard-arevalo.jpg' },
+  { name: 'Sam Moss' },
+  { name: 'Yisel Neyra Fajadro', title: 'MSN, APRN, FNP-C', photo: '/images/team/yisel-neyra-fajadro.jpg' },
+  { name: 'Barbara Mojena' },
 ]
 
 export default function Team() {
@@ -38,86 +50,56 @@ export default function Team() {
       </section>
 
       <section className="section">
-        {/* Founder spotlight */}
-        <div className="bg-lw-pink-light rounded-3xl p-10 mb-16">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Our Founder</span>
-              <h2 className="text-3xl font-bold text-lw-navy mt-2 mb-1">{team[0].name}, {team[0].credentials}</h2>
-              <p className="text-lw-pink font-medium mb-5">{team[0].title}</p>
-              <p className="text-gray-600 leading-relaxed mb-6">{team[0].bio}</p>
-              <blockquote className="border-l-4 border-lw-pink pl-5 italic text-gray-500 text-sm">
-                "Every soul we serve carries divine potential waiting to be unlocked."
-              </blockquote>
-            </div>
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-32 h-32 rounded-full bg-lw-pink flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-                ML
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-center w-full">
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-2xl font-bold text-lw-pink">20+</p>
-                  <p className="text-xs text-gray-500 mt-1">Years Experience</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-2xl font-bold text-lw-pink">2</p>
-                  <p className="text-xs text-gray-500 mt-1">Locations</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="text-2xl font-bold text-lw-pink">EN/ES</p>
-                  <p className="text-xs text-gray-500 mt-1">Bilingual</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Our team of providers */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-lw-navy mb-3">Our Providers & Staff</h2>
-          <p className="text-gray-500 max-w-xl mx-auto">Our multidisciplinary team includes licensed professionals across mental health, medical, social services, and spiritual care.</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4 mb-16">
-          {roles.map(role => (
-            <div key={role} className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-5 py-4 shadow-sm">
-              <div className="w-2 h-2 rounded-full bg-lw-pink flex-shrink-0" />
-              <span className="text-gray-700 text-sm font-medium">{role}</span>
-            </div>
+        {/* Board of Directors */}
+        <h2 className="text-2xl md:text-3xl font-bold text-lw-pink text-center mb-8">Board of Directors</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {boardOfDirectors.map((m, i) => (
+            <TeamMemberCard key={`board-${i}`} {...m} />
           ))}
         </div>
 
-        {/* Community values strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {[
-            { icon: '🤝', label: 'Compassionate', desc: 'Every team member leads with empathy first' },
-            { icon: '🌎', label: 'Multicultural', desc: 'Fluent in English & Spanish, rooted in community' },
-            { icon: '🎓', label: 'Credentialed', desc: 'Licensed professionals across every discipline' },
-            { icon: '✝️', label: 'Faith-Rooted', desc: 'Clinical excellence grounded in biblical values' },
-          ].map(v => (
-            <div key={v.label} className="bg-white rounded-3xl p-6 text-center shadow-sm border border-gray-50">
-              <p className="text-3xl mb-3">{v.icon}</p>
-              <p className="font-bold text-lw-navy text-sm mb-1">{v.label}</p>
-              <p className="text-xs text-gray-400 leading-snug">{v.desc}</p>
-            </div>
+        {/* Executive Team */}
+        <h2 className="text-2xl md:text-3xl font-bold text-lw-pink text-center mb-8">Executive Team</h2>
+        <div className="grid sm:grid-cols-2 gap-6 mb-16 max-w-2xl mx-auto">
+          {executiveTeam.map((m, i) => (
+            <TeamMemberCard key={`exec-${i}`} {...m} />
           ))}
         </div>
 
-        {/* Join the team */}
-        <div className="bg-lw-navy rounded-3xl p-10 text-white text-center">
-          <Mail size={32} className="text-lw-pink mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-3">Join Our Team</h2>
-          <p className="text-gray-300 max-w-lg mx-auto mb-8 leading-relaxed">
-            We're always looking for passionate, compassionate professionals to join our mission. Whether you're a clinician, case manager, volunteer, or community health worker — there may be a place for you at LifeWay.
+        {/* Director Team */}
+        <h2 className="text-2xl md:text-3xl font-bold text-lw-pink text-center mb-8">Director Team</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {directorTeam.map((m, i) => (
+            <TeamMemberCard key={`director-${i}`} {...m} />
+          ))}
+        </div>
+
+        {/* Medical Team */}
+        <h2 className="text-2xl md:text-3xl font-bold text-lw-pink text-center mb-8">Medical Team</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {medicalTeam.map((m, i) => (
+            <TeamMemberCard key={`medical-${i}`} {...m} />
+          ))}
+        </div>
+
+        {/* Get involved */}
+        <div className="text-center mb-3">
+          <h2 className="text-2xl md:text-3xl font-bold text-lw-navy mb-2">Get Involved</h2>
+          <p className="text-gray-500 text-sm max-w-xl mx-auto">
+            Dedicated pages for each of these are coming soon, for now, reach out and we'll point you in the right direction.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link to="/contact" className="btn-primary inline-flex items-center gap-2">
-              View Opportunities <ArrowRight size={16} />
-            </Link>
-            <Link to="/contact" className="border-2 border-white/30 text-white px-6 py-3 rounded-lg font-semibold hover:border-white transition-colors text-sm">
-              Volunteer With Us
-            </Link>
-          </div>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6 mt-8">
+          {getInvolved.map(g => (
+            <div key={g.title} className="bg-lw-navy rounded-3xl p-8 text-white text-center flex flex-col items-center">
+              <g.icon size={28} className="text-lw-pink mb-4" />
+              <h3 className="font-bold text-lg mb-2">{g.title}</h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-6 flex-1">{g.desc}</p>
+              <Link to="/contact" className="btn-primary text-sm inline-flex items-center gap-2">
+                Get in Touch <ArrowRight size={14} />
+              </Link>
+            </div>
+          ))}
         </div>
       </section>
     </div>

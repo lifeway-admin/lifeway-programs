@@ -7,12 +7,12 @@ const faqs = [
     category: 'Getting Started',
     items: [
       {
-        q: 'Are your services really free?',
-        a: 'Yes — for qualifying individuals and families, our core services are completely free. We are a 501(c)(3) nonprofit funded by grants and donations. For those with insurance, we bill Medicaid, Medicare, and select private plans. We also offer sliding scale fees and scholarships so cost is never a barrier to care.',
+        q: 'How much do your services cost?',
+        a: 'For qualifying individuals and families, our core services come at no cost, funded through grants and donations as a 501(c)(3) nonprofit. For those with insurance, we bill Medicaid, Medicare, and select private plans. We also offer sliding scale fees and scholarships so cost is never a barrier to care.',
       },
       {
         q: 'How do I book an appointment?',
-        a: 'You can book online through our booking page — it takes about 5 minutes. Choose your service, preferred provider, and a time that works for you. Same-day appointments are often available. You can also call or text us at (888) 331-3060 and we\'ll help you get set up.',
+        a: 'You can book online through our booking page, it takes about 5 minutes. Choose your service, preferred provider, and a time that works for you. Same-day appointments are often available. You can also call or text us at (888) 331-3060 and we\'ll help you get set up.',
       },
       {
         q: 'Do I need a referral?',
@@ -29,7 +29,16 @@ const faqs = [
     items: [
       {
         q: 'What insurance do you accept?',
-        a: 'We accept Medicaid, Medicare, Blue Cross, Aetna, United Health, Cigna, Humana, and most major plans. We also accept cash pay and offer sliding scale fees based on income. If you\'re unsure whether your plan is accepted, call us and we\'ll check for you.',
+        a: (
+          <>
+            We accept a wide range of Medicaid Managed Medical Assistance (MMA) plans, Medicare Advantage plans, and ACA
+            Marketplace plans, including Aetna, UnitedHealthcare, Humana, Cigna, Molina Healthcare, Oscar, Anthem / Wellpoint,
+            AmeriHealth, and TRICARE. See our{' '}
+            <Link to="/insurances" className="text-lw-pink font-semibold hover:underline">full list of accepted plans</Link>{' '}
+            for details. We also accept cash pay and offer sliding scale fees based on income. If you're unsure whether your
+            plan is accepted or active, contact us and we'll run a quick insurance eligibility check for you.
+          </>
+        ),
       },
       {
         q: 'What if I don\'t have insurance?',
@@ -58,7 +67,7 @@ const faqs = [
       },
       {
         q: 'What is your approach to mental health treatment?',
-        a: 'We use evidence-based, trauma-informed approaches that honor the whole person — body, mind, and spirit. Our clinical work is grounded in compassion and, for clients who wish it, integrated with faith-based and Christian counseling. You are always in control of what your care looks like.',
+        a: 'We use evidence-based, trauma-informed approaches that honor the whole person, body, mind, and spirit. Our clinical work is grounded in compassion and, for clients who wish it, integrated with faith-based and Christian counseling. You are always in control of what your care looks like.',
       },
       {
         q: 'Can I get help with housing, food, or other social needs?',
@@ -79,7 +88,7 @@ const faqs = [
       },
       {
         q: 'I\'m in crisis right now. What should I do?',
-        a: 'If you are in immediate danger, call 911. For mental health crisis support, call or text 988 (Suicide & Crisis Lifeline) — available 24/7, free, and confidential. You can also call us at (888) 331-3060 during our hours (Mon–Sat, 9am–9pm) and we will do our best to help.',
+        a: 'If you are in immediate danger, call 911. For mental health crisis support, call or text 988 (Suicide & Crisis Lifeline), available 24/7, free, and confidential. You can also call us at (888) 331-3060 during our hours (Mon–Sat, 9am–9pm) and we will do our best to help.',
       },
     ],
   },

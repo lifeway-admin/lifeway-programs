@@ -14,9 +14,9 @@ export default function Footer() {
             </div>
           </div>
           <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-5">
-            A faith-based 501(c)(3) nonprofit committed to offering free therapeutic, wellness, and social service support to individuals and families in need. Healing, hope, and dignity — free for all.
+            A faith-based 501(c)(3) nonprofit committed to offering accessible therapeutic, wellness, and social service support to individuals and families in need. Healing, hope, and dignity, for all.
           </p>
-          <p className="text-gray-500 text-xs italic mb-5">"Linking Individuals to Their Soaring Potential" — Isaiah 40:31</p>
+          <p className="text-gray-500 text-xs italic mb-5">"Linking Individuals to Their Soaring Potential", Isaiah 40:31</p>
           <div className="flex gap-3">
             <a href="https://instagram.com/lifewaycenter_org" target="_blank" rel="noreferrer"
               className="flex items-center gap-2 bg-white/10 hover:bg-lw-pink px-3 py-2 rounded-lg transition-colors text-xs font-semibold">
@@ -63,7 +63,7 @@ export default function Footer() {
             </li>
           </ul>
           <Link to="/book" className="mt-6 btn-primary text-sm py-2.5 px-5 inline-block">
-            Book Free Appointment
+            Book an Appointment
           </Link>
         </div>
       </div>
@@ -71,13 +71,13 @@ export default function Footer() {
       {/* Crisis resources */}
       <div className="border-t border-white/10 bg-lw-navy">
         <div className="max-w-6xl mx-auto px-6 py-3 text-center text-xs text-gray-500">
-          <span>In crisis? Call or text <a href="tel:988" className="text-lw-pink font-semibold hover:underline">988</a> (Suicide & Crisis Lifeline) — free, confidential, 24/7. For emergencies, call <a href="tel:911" className="text-lw-pink font-semibold hover:underline">911</a>.</span>
+          <span>In crisis? Call or text <a href="tel:988" className="text-lw-pink font-semibold hover:underline">988</a> (Suicide & Crisis Lifeline), free, confidential, 24/7. For emergencies, call <a href="tel:911" className="text-lw-pink font-semibold hover:underline">911</a>.</span>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <span>© {new Date().getFullYear()} LifeWay Center — Lifeway Programs, Inc. All rights reserved. · 501(c)(3) Nonprofit</span>
+          <span>© {new Date().getFullYear()} LifeWay Center, Lifeway Programs, Inc. All rights reserved. · 501(c)(3) Nonprofit</span>
           <div className="flex gap-4">
             <Link to="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
             <Link to="/hipaa" className="hover:text-gray-300 transition-colors">HIPAA Notice</Link>

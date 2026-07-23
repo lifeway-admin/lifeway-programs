@@ -1,21 +1,30 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles, Shield } from 'lucide-react'
+import { TestimonialsColumn } from '../components/ui/testimonials-columns-1'
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+}
 
 const services = [
-  { icon: Brain, title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more — for children, teens, and adults.' },
+  { icon: Brain, title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more, for children, teens, and adults.' },
   { icon: Activity, title: 'Medical & Wellness', desc: 'Primary care, preventive health, lab testing, nutrition coaching, and IV wellness therapy. Telehealth available.' },
   { icon: Users, title: 'Social Services', desc: 'Case management, housing, food support, utility assistance, referrals, and community resources.' },
   { icon: Briefcase, title: 'Employment Support', desc: 'Job placement, vocational counseling, life skills, and financial coaching to help you build stability.' },
-  { icon: Sparkles, title: 'Spiritual Care', desc: 'Faith-based inner healing, spiritual assessment, pastoral support, and prayer — healing the whole person.' },
+  { icon: Sparkles, title: 'Spiritual Care', desc: 'Faith-based inner healing, spiritual assessment, pastoral support, and prayer, healing the whole person.' },
   { icon: Shield, title: 'Addiction Recovery', desc: 'Outpatient and intensive outpatient programs, dual diagnosis support, and 12-step program referrals.' },
 ]
 
 const testimonials = [
   { name: 'Leonardo F.', text: 'From the very first moment we walked in, Kylani made an incredible impression. Outstanding care and service for my whole family.', stars: 5 },
-  { name: 'Sandra D.', text: 'Never seen anything like it — my mom got a referral the same day. All staff were nice, respectful, and professional.', stars: 5 },
+  { name: 'Sandra D.', text: 'Never seen anything like it, my mom got a referral the same day. All staff were nice, respectful, and professional.', stars: 5 },
   { name: 'Santiago S.', text: 'I have finally found the right place to keep up with my health. Very happy with all the staff members. Thank you!', stars: 5 },
   { name: 'Loraine L.', text: 'Cannot speak more highly of this place. Thank you for helping me, tremendously.', stars: 5 },
 ]
+
+const testimonialColumns = [testimonials.slice(0, 2), testimonials.slice(2, 4)]
 
 const appointments = [
   'Health Support',
@@ -29,22 +38,41 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-lw-navy via-[#1e1645] to-[#2d1f4e] text-white overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32">
+      <section className="relative bg-gradient-to-br from-lw-navy via-[#1e1645] to-[#2d1f4e] text-white overflow-hidden">
+        {/* Aurora background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-lw-pink/20 blur-3xl"
+            animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
+            transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-[#2d1f4e]/70 blur-3xl"
+            animate={{ x: [0, -30, 0], y: [0, 40, 0] }}
+            transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute bottom-0 left-1/3 w-80 h-80 rounded-full bg-lw-pink/10 blur-3xl"
+            animate={{ x: [0, 20, 0], y: [0, -20, 0] }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-flex items-center gap-2 bg-lw-pink/20 text-lw-pink text-xs font-semibold px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider">
-                <Heart size={12} /> Christian Holistic Care · Free for All
+                <Heart size={12} /> Christian Holistic Care · Accessible to All
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-5">
                 Healing, Hope<br />
                 <span className="text-lw-pink">& Dignity</span>
               </h1>
               <p className="text-pink-200 italic text-base mb-6 leading-relaxed max-w-md">
-                "Because healing, hope, and dignity should never come with a price tag."
+                "Because healing, hope, and dignity should be within everyone's reach."
               </p>
               <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-lg">
-                You are seen. You are valued. You are not alone. We walk alongside you with free, compassionate care — no matter your story, your background, or where you are on your journey.
+                You are seen. You are valued. You are not alone. We walk alongside you with compassionate, accessible care, no matter your story, your background, or where you are on your journey.
               </p>
               <div className="flex flex-wrap gap-4 mb-8">
                 <Link to="/book" className="btn-primary text-base px-8 py-3.5 flex items-center gap-2">
@@ -62,7 +90,7 @@ export default function Home() {
 
             {/* Appointment cards */}
             <div className="hidden md:block">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">Free Appointments Available</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4">Appointments Available</p>
               <div className="space-y-3">
                 {appointments.map(a => (
                   <Link
@@ -75,7 +103,7 @@ export default function Home() {
                       <span className="text-sm font-medium">Receive {a}</span>
                     </div>
                     <span className="text-xs text-lw-pink font-semibold bg-lw-pink/20 px-2.5 py-1 rounded-full group-hover:bg-lw-pink/30 transition-colors">
-                      Free · No Waitlist
+                      No Waitlist
                     </span>
                   </Link>
                 ))}
@@ -95,7 +123,7 @@ export default function Home() {
       <section className="bg-lw-pink text-white">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
           <p className="font-semibold text-center md:text-left italic">
-            "Linking Individuals to Their Soaring Potential" — Inspired by Isaiah 40:31
+            "Linking Individuals to Their Soaring Potential", Inspired by Isaiah 40:31
           </p>
           <div className="flex flex-wrap gap-6 text-pink-100">
             <span className="flex items-center gap-2"><MapPin size={14} /> Homestead, FL</span>
@@ -111,12 +139,20 @@ export default function Home() {
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">What We Offer</span>
           <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-4">Whatever You're Carrying,<br className="hidden md:block" /> We're Here</h2>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            From grief and anxiety to housing challenges and addiction recovery — our team wraps around you and your family with real professional care and genuine love.
+            From grief and anxiety to housing challenges and addiction recovery, our team wraps around you and your family with real professional care and genuine love.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map(s => (
-            <div key={s.title} className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-gray-50">
+          {services.map((s, i) => (
+            <motion.div
+              key={s.title}
+              className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group border border-gray-50"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+              transition={{ ...fadeUp.show.transition, delay: (i % 3) * 0.1 }}
+            >
               <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5">
                 <s.icon size={26} className="text-lw-pink" />
               </div>
@@ -125,7 +161,7 @@ export default function Home() {
               <Link to="/services" className="text-lw-pink text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
                 Learn more <ArrowRight size={14} />
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -134,26 +170,30 @@ export default function Home() {
       <section className="bg-lw-warm">
         <div className="section">
           <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div>
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+            >
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Why LifeWay Center</span>
               <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">A Place Where You<br />Truly Belong</h2>
               <p className="text-gray-500 leading-relaxed mb-8">
-                We're not just a clinic — we're a community. A Christ-centered family that sees you as a whole person, meets you without judgment, and walks with you every step of the way toward healing and wholeness.
+                We're not just a clinic, we're a community. A Christ-centered family that sees you as a whole person, meets you without judgment, and walks with you every step of the way toward healing and wholeness.
               </p>
               <ul className="space-y-3">
                 {[
                   ['Faith-Based Excellence', 'Clinical skill blended with biblical truth'],
                   ['Multicultural & Bilingual', 'Services available in English & Spanish'],
-                  ['Holistic & Trauma-Informed', 'Healing the whole person — body, mind & spirit'],
+                  ['Holistic & Trauma-Informed', 'Healing the whole person, body, mind & spirit'],
                   ['Accessible to All', 'Medicaid, insurance, cash pay, sliding scale & scholarships'],
                   ['Easy to Access', 'Same-day appointments, telehealth & evening sessions'],
-                  ['Truly Free', 'Because healing and dignity should never have a price tag'],
                 ].map(([title, desc]) => (
                   <li key={title} className="flex items-start gap-3">
                     <CheckCircle size={18} className="text-lw-pink flex-shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold text-lw-navy text-sm">{title}</span>
-                      <span className="text-gray-500 text-sm"> — {desc}</span>
+                      <span className="text-gray-500 text-sm">, {desc}</span>
                     </div>
                   </li>
                 ))}
@@ -161,7 +201,7 @@ export default function Home() {
               <Link to="/about" className="btn-primary mt-8 inline-flex items-center gap-2">
                 Our Story <ArrowRight size={16} />
               </Link>
-            </div>
+            </motion.div>
 
             {/* Access features */}
             <div className="grid grid-cols-1 gap-4">
@@ -169,7 +209,7 @@ export default function Home() {
                 {
                   icon: Calendar,
                   title: 'Same-Day Appointments',
-                  desc: 'No long waitlists. We make space for you the moment you reach out — because healing shouldn\'t have to wait.',
+                  desc: 'No long waitlists. We make space for you the moment you reach out, because healing shouldn\'t have to wait.',
                 },
                 {
                   icon: Clock,
@@ -179,15 +219,23 @@ export default function Home() {
                 {
                   icon: Phone,
                   title: 'Statewide Telehealth',
-                  desc: 'Serving all of Florida from wherever you are — secure video sessions on any device.',
+                  desc: 'Serving all of Florida from wherever you are, secure video sessions on any device.',
                 },
                 {
                   icon: Heart,
                   title: 'Cost Is Never a Barrier',
-                  desc: 'Medicaid, Medicare, private insurance, sliding scale fees, and scholarships — we find a way for everyone.',
+                  desc: 'Medicaid, Medicare, private insurance, sliding scale fees, and scholarships, we find a way for everyone.',
                 },
-              ].map(f => (
-                <div key={f.title} className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-50 flex items-start gap-4">
+              ].map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-50 flex items-start gap-4"
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.3 }}
+                  variants={fadeUp}
+                  transition={{ ...fadeUp.show.transition, delay: i * 0.1 }}
+                >
                   <div className="w-10 h-10 rounded-xl bg-lw-pink-light flex items-center justify-center flex-shrink-0 mt-0.5">
                     <f.icon size={18} className="text-lw-pink" />
                   </div>
@@ -195,7 +243,7 @@ export default function Home() {
                     <p className="font-semibold text-lw-navy text-sm mb-0.5">{f.title}</p>
                     <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -220,30 +268,10 @@ export default function Home() {
             <p className="text-gray-500 max-w-md mx-auto">Real experiences from the people we're honored to walk alongside</p>
           </div>
 
-          {/* Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            {testimonials.map(t => (
-              <div key={t.name} className="bg-white rounded-3xl p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
-                <span className="absolute top-4 right-5 text-6xl font-serif text-lw-pink/10 leading-none select-none">"</span>
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.stars }).map((_, i) => (
-                    <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed flex-1 mb-6">
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lw-pink to-lw-pink-dark flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {t.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-lw-navy text-sm">{t.name}</p>
-                    <p className="text-xs text-gray-400">Google Review</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Cards, vertical auto-scrolling columns */}
+          <div className="flex justify-center gap-6 mb-10 [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)] max-h-[600px] overflow-hidden">
+            <TestimonialsColumn testimonials={testimonialColumns[0]} duration={18} />
+            <TestimonialsColumn testimonials={testimonialColumns[1]} duration={22} className="hidden sm:block" />
           </div>
 
           <div className="text-center">
@@ -264,7 +292,7 @@ export default function Home() {
         <div className="section">
           <div className="text-center mb-12">
             <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Find Us</span>
-            <h2 className="text-3xl font-bold mt-2">Come As You Are — We're Close By</h2>
+            <h2 className="text-3xl font-bold mt-2">Come As You Are, We're Close By</h2>
             <p className="text-gray-400 mt-3 text-sm">Two welcoming locations in South Florida, plus telehealth statewide</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -293,7 +321,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-6 py-20 text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">You Don't Have to Face This Alone</h2>
           <p className="text-pink-100 mb-8 text-lg max-w-xl mx-auto leading-relaxed">
-            Taking that first step can feel hard. We promise to make everything after that easy — compassionate, confidential, and completely free.
+            Taking that first step can feel hard. We promise to make everything after that easy, compassionate, confidential, and accessible.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/book" className="bg-white text-lw-pink font-bold px-8 py-3.5 rounded-xl hover:bg-pink-50 transition-colors flex items-center gap-2">
