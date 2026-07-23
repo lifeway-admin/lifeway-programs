@@ -144,6 +144,24 @@ const TRANSLATIONS = {
     intakeFormsDone: 'Intake Forms Complete',
     intakeFormsDoneNote: 'All forms signed. A receipt has been sent to your email.',
 
+    // Entry gateway
+    entryTitle: 'Welcome to Lifeway Programs',
+    entrySub: 'Are you a new or returning client?',
+    newClientBtn: 'New Client',
+    newClientSub: "I'm scheduling my first appointment",
+    returningClientBtn: 'Returning Client',
+    returningClientSub: "I've been seen here before",
+
+    // Category gateway
+    categoryTitle: 'What can we help you with?',
+    categorySub: 'Select a category to schedule with ZocDoc',
+    catTherapist: 'Schedule with a\nTherapist',
+    catMedical: 'Schedule with a\nMedical Provider',
+    catWellness: 'Schedule with a\nWellness Specialist',
+    catSocialWorker: 'Schedule with a\nSocial Worker',
+    bookDirectlyLink: 'Prefer to book directly with our office instead?',
+    helpPhone: 'For Help Call or Text: (888) 331-3060',
+
     // Spanish notice (not shown in EN mode)
     spanishNotice: null,
   },
@@ -280,6 +298,24 @@ const TRANSLATIONS = {
     intakeFormsSkip: 'Omitir — Firmaré en la oficina',
     intakeFormsDone: 'Formularios Completados',
     intakeFormsDoneNote: 'Todos los formularios firmados. Se ha enviado un comprobante a su correo.',
+
+    // Entry gateway
+    entryTitle: 'Bienvenido a Lifeway Programs',
+    entrySub: '¿Es usted un cliente nuevo o un cliente que regresa?',
+    newClientBtn: 'Cliente Nuevo',
+    newClientSub: 'Estoy programando mi primera cita',
+    returningClientBtn: 'Cliente que Regresa',
+    returningClientSub: 'Ya he sido atendido aquí antes',
+
+    // Category gateway
+    categoryTitle: '¿En qué podemos ayudarle?',
+    categorySub: 'Seleccione una categoría para reservar con ZocDoc',
+    catTherapist: 'Reservar con un\nTerapeuta',
+    catMedical: 'Reservar con un\nProveedor Médico',
+    catWellness: 'Reservar con un\nEspecialista en Bienestar',
+    catSocialWorker: 'Reservar con un\nTrabajador Social',
+    bookDirectlyLink: '¿Prefiere reservar directamente con nuestra oficina?',
+    helpPhone: 'Para Ayuda Llame o Envíe un Mensaje de Texto: (888) 331-3060',
 
     // Spanish notice shown at top of consent modal body
     spanishNotice: 'Nota: Este formulario está disponible en español. El contenido legal a continuación está en inglés. Para una traducción completa, comuníquese con nuestra oficina.',
@@ -501,6 +537,80 @@ function InfoStep({ onNext, t }) {
         />
       )}
     </form>
+  )
+}
+
+// ── Entry Gateway: New or Returning Client ─────────────────────────────────────
+
+function EntryStep({ onSelect, t }) {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t.entryTitle}</h2>
+      <p className="text-gray-500 text-center mb-8">{t.entrySub}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <button
+          onClick={() => onSelect('new')}
+          className="flex flex-col items-center p-6 rounded-xl border-2 border-gray-200 hover:border-lifeway-pink hover:shadow-md cursor-pointer transition-all bg-white text-center"
+        >
+          <span className="font-semibold text-gray-900">{t.newClientBtn}</span>
+          <span className="text-sm text-gray-500 mt-1">{t.newClientSub}</span>
+        </button>
+        <button
+          onClick={() => onSelect('returning')}
+          className="flex flex-col items-center p-6 rounded-xl border-2 border-gray-200 hover:border-lifeway-pink hover:shadow-md cursor-pointer transition-all bg-white text-center"
+        >
+          <span className="font-semibold text-gray-900">{t.returningClientBtn}</span>
+          <span className="text-sm text-gray-500 mt-1">{t.returningClientSub}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Category Gateway: ZocDoc redirect cards ────────────────────────────────────
+
+const CATEGORY_LINKS = {
+  therapist: 'https://docs.google.com/forms/d/e/1FAIpQLSdTA9I2O1I8PcmJwXzZIBhWvj5U7ayzSRHk3FXA0c67RrrICg/viewform',
+  medical: 'https://www.zocdoc.com/practice/lifeway-programs-inc-174864?isNewPatient=true&utm_term=booking_link&referrerType=widget',
+  wellness: 'https://www.zocdoc.com/PLACEHOLDER-wellness-specialist',
+  social_worker: 'https://www.zocdoc.com/PLACEHOLDER-social-worker',
+}
+
+function withPatientType(url, patientType) {
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}patient_type=${patientType || 'new'}`
+}
+
+function CategoryStep({ patientType, onBookDirect, t }) {
+  const categories = [
+    { key: 'therapist', label: t.catTherapist },
+    { key: 'medical', label: t.catMedical },
+    { key: 'wellness', label: t.catWellness },
+    { key: 'social_worker', label: t.catSocialWorker },
+  ]
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t.categoryTitle}</h2>
+      <p className="text-gray-500 text-center mb-8">{t.categorySub}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {categories.map((cat) => (
+          <a
+            key={cat.key}
+            href={withPatientType(CATEGORY_LINKS[cat.key], patientType)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center p-6 rounded-lg shadow-md bg-lifeway-pink hover:opacity-90 transition-opacity text-center"
+          >
+            <span className="font-semibold text-white whitespace-pre-line">{cat.label}</span>
+          </a>
+        ))}
+      </div>
+      <p className="text-center mt-8">
+        <button onClick={onBookDirect} className="text-sm text-gray-500 hover:text-lifeway-pink underline transition-colors">
+          {t.bookDirectlyLink}
+        </button>
+      </p>
+    </div>
   )
 }
 
@@ -1228,6 +1338,8 @@ export default function App() {
     sessionStorage.setItem('lw_lang', l)
   }
 
+  const [entry, setEntry] = useState('gateway') // 'gateway' | 'category' | 'wizard'
+  const [patientType, setPatientType] = useState(null)
   const [step, setStep] = useState(1)
   const [services, setServices] = useState([])
   const [providers, setProviders] = useState([])
@@ -1343,6 +1455,13 @@ export default function App() {
     if (step > 1 && step < 6) setStep(s => s - 1)
   }
 
+  const handleEntrySelect = (type) => {
+    setPatientType(type)
+    setEntry('category')
+  }
+
+  const handleBookDirect = () => setEntry('wizard')
+
   if (isCancelPage) return <CancelLookup t={t} />
 
   return (
@@ -1366,13 +1485,13 @@ export default function App() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {step < 6 && (
+        {entry === 'wizard' && step < 6 && (
           <div className="mb-6">
             <StepIndicator currentStep={step} t={t} />
           </div>
         )}
 
-        {step > 1 && step < 6 && (
+        {entry === 'wizard' && step > 1 && step < 6 && (
           <button
             onClick={handleBack}
             className="flex items-center gap-1 text-gray-500 hover:text-lifeway-pink mb-4 text-sm font-medium transition-colors"
@@ -1389,11 +1508,13 @@ export default function App() {
         )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-          {step === 1 && <InfoStep onNext={handleInfoNext} t={t} />}
-          {step === 2 && <ServiceStep services={services} onSelect={handleServiceSelect} t={t} />}
-          {step === 3 && <ProviderStep providers={providers} selectedService={selectedService} onSelect={handleProviderSelect} t={t} />}
-          {step === 4 && <DateTimeStep selectedProvider={selectedProvider} onSelect={handleSlotSelect} t={t} />}
-          {step === 5 && (
+          {entry === 'gateway' && <EntryStep onSelect={handleEntrySelect} t={t} />}
+          {entry === 'category' && <CategoryStep patientType={patientType} onBookDirect={handleBookDirect} t={t} />}
+          {entry === 'wizard' && step === 1 && <InfoStep onNext={handleInfoNext} t={t} />}
+          {entry === 'wizard' && step === 2 && <ServiceStep services={services} onSelect={handleServiceSelect} t={t} />}
+          {entry === 'wizard' && step === 3 && <ProviderStep providers={providers} selectedService={selectedService} onSelect={handleProviderSelect} t={t} />}
+          {entry === 'wizard' && step === 4 && <DateTimeStep selectedProvider={selectedProvider} onSelect={handleSlotSelect} t={t} />}
+          {entry === 'wizard' && step === 5 && (
             <ConsentStep
               form={bookingForm}
               selectedService={selectedService}
@@ -1405,7 +1526,7 @@ export default function App() {
               lang={lang}
             />
           )}
-          {step === 6 && (
+          {entry === 'wizard' && step === 6 && (
             <ConfirmationStep
               confirmation={confirmation}
               selectedService={selectedService}
@@ -1420,6 +1541,9 @@ export default function App() {
 
         <p className="text-center text-xs text-gray-400 mt-6">
           Lifeway Programs · {t.tagline}
+        </p>
+        <p className="text-center text-sm text-gray-600 font-medium mt-2">
+          <a href="tel:+18883313060" className="hover:text-lifeway-pink transition-colors">{t.helpPhone}</a>
         </p>
       </main>
     </div>
