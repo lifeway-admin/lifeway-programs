@@ -1,3 +1,4 @@
+import html
 import os
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
@@ -10,6 +11,8 @@ import string
 import models
 from database import get_db
 from limiter import limiter
+from security_utils import safe_join
+from auth import password_strength_check
 
 _FORMS_DIR = os.path.normpath(
     os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "docs", "patient-forms")
@@ -337,11 +340,15 @@ class IntakeRequest(BaseModel):
     notes: Optional[str] = None
 
 
-@router.get("/lookup")
+class AppointmentLookupRequest(BaseModel):
+    confirmation: str
+
+
+@router.post("/lookup")
 @limiter.limit("5/minute")
-def lookup_appointment(request: Request, confirmation: str, db: Session = Depends(get_db)):
+def lookup_appointment(request: Request, body: AppointmentLookupRequest, db: Session = Depends(get_db)):
     """Look up an appointment by confirmation number (e.g. LW-123456)."""
-    normalized = confirmation.strip().upper()
+    normalized = body.confirmation.strip().upper()
     if not normalized.startswith("LW-"):
         raise HTTPException(status_code=404, detail="Invalid confirmation number format")
 
@@ -367,33 +374,38 @@ def lookup_appointment(request: Request, confirmation: str, db: Session = Depend
     }
 
 
-@router.get("/patient-lookup")
+class PatientLookupRequest(BaseModel):
+    email: str
+    dob: str
+
+
+@router.post("/patient-lookup")
 @limiter.limit("10/minute")
 def patient_lookup(
     request: Request,
-    email: str = Query(..., description="Patient email"),
-    dob: Optional[str] = Query(None, description="Date of birth YYYY-MM-DD for verification"),
+    body: PatientLookupRequest,
     db: Session = Depends(get_db),
 ):
-    """Look up a patient by email + DOB to pre-fill the public booking form."""
+    """Look up a patient by email + DOB to pre-fill the public booking form.
+    Requires both factors to match — a client record with no DOB on file
+    cannot be looked up this way (there'd be nothing to verify against)."""
     from sqlalchemy import func as sa_func
     client = db.query(models.Client).filter(
-        sa_func.lower(models.Client.email) == email.strip().lower()
+        sa_func.lower(models.Client.email) == body.email.strip().lower()
     ).first()
     # Generic error — don't reveal whether email exists
     not_found = HTTPException(status_code=404, detail="No record found. Please check your email and date of birth.")
     if not client:
         raise not_found
-    # If the client has a DOB on file, require it to match
-    if client.date_of_birth:
-        if not dob:
-            raise HTTPException(status_code=400, detail="Date of birth is required to verify your identity.")
-        try:
-            provided = date.fromisoformat(dob.strip())
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
-        if provided != client.date_of_birth:
-            raise not_found
+    # DOB is always required and must match — no fallback to email-only match
+    if not client.date_of_birth:
+        raise not_found
+    try:
+        provided = date.fromisoformat(body.dob.strip())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+    if provided != client.date_of_birth:
+        raise not_found
     return {
         "first_name": client.first_name or "",
         "last_name": client.last_name or "",
@@ -409,9 +421,12 @@ def patient_lookup(
 @limiter.limit("60/minute")
 def get_form_content(request: Request, filename: str):
     """Serve patient form markdown for the in-browser signing flow."""
-    if not filename.endswith(".md") or "/" in filename or ".." in filename:
+    if not filename.endswith(".md"):
         raise HTTPException(status_code=400, detail="Invalid filename")
-    path = os.path.join(_FORMS_DIR, filename)
+    try:
+        path = safe_join(_FORMS_DIR, filename)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid filename")
     if not os.path.isfile(path):
         raise HTTPException(status_code=404, detail="Form not found")
     with open(path, "r", encoding="utf-8") as f:
@@ -426,10 +441,10 @@ class SignatureItem(BaseModel):
 
 class SignFormsRequest(BaseModel):
     client_id: int
-    appointment_id: Optional[int] = None
+    appointment_id: int
     signatures: List[SignatureItem]
-    patient_email: Optional[str] = None
-    patient_name: Optional[str] = None
+    patient_email: str
+    patient_name: str
 
 
 @router.post("/sign-forms")
@@ -439,19 +454,17 @@ def sign_forms(request: Request, body: SignFormsRequest, db: Session = Depends(g
     client = db.query(models.Client).filter(models.Client.id == body.client_id).first()
     if not client:
         raise HTTPException(status_code=400, detail="Invalid request")
-    # Require email verification — must match what's on file (case-insensitive)
-    if body.patient_email:
-        if not client.email or client.email.strip().lower() != body.patient_email.strip().lower():
-            raise HTTPException(status_code=400, detail="Invalid request")
+    # Email verification is mandatory — must match what's on file (case-insensitive)
+    if not client.email or client.email.strip().lower() != body.patient_email.strip().lower():
+        raise HTTPException(status_code=400, detail="Invalid request")
 
-    # If appointment_id provided, verify it belongs to this client
-    if body.appointment_id:
-        appt = db.query(models.Appointment).filter(
-            models.Appointment.id == body.appointment_id,
-            models.Appointment.client_id == body.client_id,
-        ).first()
-        if not appt:
-            raise HTTPException(status_code=400, detail="Invalid request")
+    # appointment_id is mandatory and must belong to this client
+    appt = db.query(models.Appointment).filter(
+        models.Appointment.id == body.appointment_id,
+        models.Appointment.client_id == body.client_id,
+    ).first()
+    if not appt:
+        raise HTTPException(status_code=400, detail="Invalid request")
 
     signer_ip = request.client.host if request.client else None
     signed_at = datetime.now().strftime("%B %d, %Y at %I:%M %p")
@@ -471,7 +484,7 @@ def sign_forms(request: Request, body: SignFormsRequest, db: Session = Depends(g
         sig_details.append({"form_title": sig.form_title, "signer_name": sig.signer_name})
     db.commit()
 
-    if body.patient_email and body.patient_name and saved:
+    if saved:
         try:
             from pdf_service import generate_signing_certificate
             pdf_bytes = generate_signing_certificate(
@@ -512,30 +525,35 @@ def contact_form(request: Request, body: ContactRequest):
     """Receives website contact form submissions and forwards to staff inbox."""
     try:
         from email_service import _send
-        subject_line = f"[Contact Form] {body.subject or 'General Inquiry'} — {body.name}"
-        html = f"""
+        safe_name = html.escape(body.name)
+        safe_email = html.escape(body.email)
+        safe_phone = html.escape(body.phone) if body.phone else None
+        safe_subject = html.escape(body.subject) if body.subject else None
+        safe_message = html.escape(body.message)
+        subject_line = f"[Contact Form] {safe_subject or 'General Inquiry'} — {safe_name}"
+        email_html = f"""
         <div style="font-family:sans-serif;max-width:600px;color:#1f2937;">
           <h2 style="color:#e91e8c;">New Contact Form Submission</h2>
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;width:120px;">Name</td>
-                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.name}</td></tr>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{safe_name}</td></tr>
             <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Email</td>
-                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.email}</td></tr>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{safe_email}</td></tr>
             <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Phone</td>
-                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.phone or '—'}</td></tr>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{safe_phone or '—'}</td></tr>
             <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6;">Topic</td>
-                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{body.subject or '—'}</td></tr>
+                <td style="padding:8px 0;font-weight:600;border-bottom:1px solid #f3f4f6;">{safe_subject or '—'}</td></tr>
           </table>
           <div style="margin-top:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;">
             <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:#9ca3af;letter-spacing:1px;">Message</p>
-            <p style="margin:0;font-size:14px;white-space:pre-wrap;">{body.message}</p>
+            <p style="margin:0;font-size:14px;white-space:pre-wrap;">{safe_message}</p>
           </div>
           <p style="margin-top:16px;font-size:12px;color:#9ca3af;">Sent via lifewayprograms.org contact form</p>
         </div>"""
         import os
         staff_inbox = os.getenv("SMTP_FROM_EMAIL", "")
         if staff_inbox:
-            _send(staff_inbox, subject_line, html)
+            _send(staff_inbox, subject_line, email_html)
     except Exception:
         pass
     return {"success": True}
@@ -576,11 +594,25 @@ def accept_invite(request: Request, token: str, body: InviteAcceptRequest, db: S
     if invite.expires_at < datetime.now():
         raise HTTPException(status_code=410, detail="This invitation has expired")
 
+    # Enforce the same password policy used everywhere else in the app
+    password_strength_check(body.password)
+
     # Check username / email uniqueness
     if db.query(models.User).filter(models.User.username == body.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
     if db.query(models.User).filter(models.User.email == invite.email).first():
         raise HTTPException(status_code=400, detail="An account with this email already exists")
+
+    # Atomically claim the invite before creating the account — closes a race
+    # where two concurrent requests both pass the accepted_at==None check above
+    # and each create an account from the same single-use invite.
+    claimed = db.query(models.StaffInvite).filter(
+        models.StaffInvite.id == invite.id,
+        models.StaffInvite.accepted_at == None,
+    ).update({"accepted_at": datetime.now()})
+    if not claimed:
+        db.rollback()
+        raise HTTPException(status_code=404, detail="Invitation not found or already used")
 
     from passlib.context import CryptContext
     _bcrypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -594,9 +626,6 @@ def accept_invite(request: Request, token: str, body: InviteAcceptRequest, db: S
         is_active=True,
     )
     db.add(user)
-
-    # Mark invite used
-    invite.accepted_at = datetime.now()
     db.commit()
 
     return {"success": True, "message": "Account created. You can now log in."}
@@ -687,19 +716,20 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     if not stripe_key:
         raise HTTPException(status_code=503, detail="Stripe not configured")
 
+    if not webhook_secret:
+        # Fail closed: without a webhook secret we cannot verify the payload
+        # actually came from Stripe, so refuse rather than trusting it blindly.
+        raise HTTPException(status_code=503, detail="Webhook signing secret not configured")
+
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature", "")
 
     try:
         import stripe
         stripe.api_key = stripe_key
-        if webhook_secret:
-            event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-        else:
-            import json
-            event = json.loads(payload)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Webhook error: {e}")
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Webhook signature verification failed")
 
     if event.get("type") == "checkout.session.completed":
         session = event["data"]["object"]

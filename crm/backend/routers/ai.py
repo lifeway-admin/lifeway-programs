@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
 import os
 from auth import get_current_user
+from limiter import limiter
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -33,7 +34,8 @@ SYSTEM = f"You are a marketing specialist for Lifeway Programs.\n\n{LIFEWAY_CONT
 
 
 @router.post("/generate")
-async def generate(req: GenerateRequest, _=Depends(get_current_user)):
+@limiter.limit("20/hour")
+async def generate(request: Request, req: GenerateRequest, _=Depends(get_current_user)):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise HTTPException(status_code=503, detail="ANTHROPIC_API_KEY not set. Add it to crm/backend/.env")

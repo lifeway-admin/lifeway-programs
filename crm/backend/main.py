@@ -141,7 +141,7 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     token = create_access_token({"sub": user.username})
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "role": user.role}
 
 
 @app.post("/auth/register", response_model=schemas.UserOut, status_code=201)

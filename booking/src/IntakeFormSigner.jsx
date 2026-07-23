@@ -80,8 +80,20 @@ function renderMarkdown(text) {
   return result
 }
 
-function formatInline(text) {
+function escapeHtml(text) {
   return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function formatInline(text) {
+  // Escape raw HTML in the source *before* applying markdown substitutions,
+  // so literal <script>/<img onerror> etc. in a form's .md source can't
+  // execute — only our own <strong>/<em>/<code> tags are ever injected.
+  return escapeHtml(text)
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/`([^`]+)`/g, '<code style="background:#f3f4f6;padding:0 2px;border-radius:3px;font-size:11px;">$1</code>')

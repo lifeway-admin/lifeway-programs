@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ArrowRight, CheckCircle } from 'lucide-react'
+import { fadeUp } from '../lib/animations'
 
 const values = [
   { title: 'Faith-Based Excellence', desc: 'We blend clinical skill with biblical truth, believing that lasting transformation is both professional and spiritual.' },
@@ -14,8 +16,9 @@ export default function About() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-lw-navy text-white">
-        <div className="max-w-6xl mx-auto px-6 py-20">
+      <section className="relative bg-lw-navy text-white overflow-hidden">
+        <div className="absolute inset-0 bg-noise pointer-events-none" />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Who We Are</span>
@@ -49,7 +52,13 @@ export default function About() {
 
       {/* Mission */}
       <section className="section">
-        <div className="max-w-3xl mx-auto text-center mb-20">
+        <motion.div
+          className="max-w-3xl mx-auto text-center mb-20"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Our Mission</span>
           <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mt-2 mb-6">
             Linking Individuals to Their Soaring Potential
@@ -60,10 +69,16 @@ export default function About() {
           <p className="text-gray-500 leading-relaxed">
             As a nonprofit, multicultural, and spiritually grounded agency, we serve children, families, and individuals with high-quality clinical care that addresses the whole person, body, mind, and spirit.
           </p>
-        </div>
+        </motion.div>
 
         {/* Founder */}
-        <div className="bg-lw-pink-light rounded-3xl p-10 mb-20">
+        <motion.div
+          className="bg-lw-pink-light rounded-3xl p-10 mb-20"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Our Founder</span>
@@ -76,7 +91,7 @@ export default function About() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="bg-lw-pink rounded-2xl p-6 text-white">
+              <div className="bg-lw-pink-dark rounded-2xl p-6 text-white">
                 <p className="text-4xl font-bold mb-1">20+</p>
                 <p className="font-semibold text-sm mb-1">Years of Clinical Experience</p>
                 <p className="text-pink-100 text-xs leading-relaxed">Spanning community mental health, social services, trauma-informed care, and faith-based counseling across South Florida.</p>
@@ -99,42 +114,68 @@ export default function About() {
               </blockquote>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Values */}
-        <div className="text-center mb-12">
+        <motion.div
+          className="text-center mb-12"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">What Guides Us</span>
           <h2 className="text-3xl font-bold text-lw-navy mt-2">Our Core Values</h2>
-        </div>
+        </motion.div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          {values.map(v => (
-            <div key={v.title} className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+          {values.map((v, i) => (
+            <motion.div
+              key={v.title}
+              className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+              transition={{ ...fadeUp.show.transition, delay: (i % 3) * 0.1 }}
+            >
               <CheckCircle size={20} className="text-lw-pink mb-3" />
               <h3 className="font-bold text-lw-navy mb-2">{v.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Explore services CTA */}
-        <div className="text-center bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+        <motion.div
+          className="text-center bg-white border border-gray-100 rounded-2xl p-8 shadow-sm"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <h3 className="text-xl font-bold text-lw-navy mb-2">Want the Full Picture?</h3>
           <p className="text-gray-500 mb-5">Explore our complete range of mental health, medical, social, and spiritual services.</p>
           <Link to="/services" className="btn-primary inline-flex items-center gap-2">
             View All Services <ArrowRight size={16} />
           </Link>
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA */}
-      <section className="bg-lw-pink">
-        <div className="max-w-4xl mx-auto px-6 py-16 text-center text-white">
+      <section className="bg-lw-pink-dark">
+        <motion.div
+          className="max-w-4xl mx-auto px-6 py-16 text-center text-white"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <h2 className="text-3xl font-bold mb-4">Ready to Heal, Grow, and Soar?</h2>
           <p className="text-pink-100 mb-8">Let us walk with you, clinically, spiritually, and compassionately.</p>
           <Link to="/book" className="bg-white text-lw-pink font-bold px-8 py-3.5 rounded-lg hover:bg-pink-50 transition-colors inline-flex items-center gap-2">
             Book an Appointment <ArrowRight size={16} />
           </Link>
-        </div>
+        </motion.div>
       </section>
     </div>
   )

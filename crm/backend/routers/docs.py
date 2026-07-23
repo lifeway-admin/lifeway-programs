@@ -2,6 +2,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import PlainTextResponse
 from auth import get_current_user
+from security_utils import safe_join
 
 router = APIRouter(prefix="/docs", tags=["docs"])
 
@@ -34,9 +35,12 @@ PATIENT_FORMS_METADATA = [
 
 
 def _read_doc(directory: str, filename: str) -> str:
-    if not filename.endswith(".md") or "/" in filename or ".." in filename:
+    if not filename.endswith(".md"):
         raise HTTPException(status_code=400, detail="Invalid filename")
-    path = os.path.join(directory, filename)
+    try:
+        path = safe_join(directory, filename)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid filename")
     if not os.path.isfile(path):
         raise HTTPException(status_code=404, detail="Document not found")
     with open(path, "r", encoding="utf-8") as f:

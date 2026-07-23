@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { fadeUp } from '../lib/animations'
 
 export default function Founder() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-lw-navy text-white">
-        <div className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <section className="relative bg-lw-navy text-white overflow-hidden">
+        <div className="absolute inset-0 bg-noise pointer-events-none" />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">The Soul Behind Lifeway Center</span>
           <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Meet Our Founder</h1>
           <p className="text-gray-300 max-w-xl mx-auto text-lg leading-relaxed">
@@ -16,7 +19,7 @@ export default function Founder() {
 
       <section className="section">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
+          <motion.div className="text-center mb-10" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
             <img
               src="/images/team/mayelin-lima.jpg"
               alt="Mayelin Lima"
@@ -25,20 +28,20 @@ export default function Founder() {
             <p className="font-bold text-lw-navy text-lg">Mayelin Lima</p>
             <p className="text-gray-500 text-sm">President &amp; CEO, Lifeway Center</p>
             <p className="italic text-gray-500 text-sm mt-1">"They will soar on wings like eagles…", Isaiah 40:31</p>
-          </div>
+          </motion.div>
 
-          <p className="text-gray-600 leading-relaxed mb-8">
+          <motion.p className="text-gray-600 leading-relaxed mb-8" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
             <strong className="text-lw-navy">Mayelin Lima</strong> is a Licensed Clinical Social Worker, bilingual in English
             and Spanish, with over 20 years of experience in healthcare and behavioral health. Her unwavering belief in the
             God-given potential within every person she serves shapes everything Lifeway Center does.
-          </p>
+          </motion.p>
 
-          <div className="bg-lw-pink-light rounded-2xl px-6 py-5 text-center mb-8">
+          <motion.div className="bg-lw-pink-light rounded-2xl px-6 py-5 text-center mb-8" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
             <p className="font-semibold text-lw-navy">"Linking Individuals to Their Soaring Potential."</p>
             <p className="text-xs text-gray-500 mt-1">Mayelin's founding mission for Lifeway Center</p>
-          </div>
+          </motion.div>
 
-          <div className="mb-8">
+          <motion.div className="mb-8" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
             <h3 className="flex items-center gap-2 text-xl font-bold text-lw-navy mb-4">
               <span>👣</span> Her Journey
             </h3>
@@ -58,20 +61,20 @@ export default function Founder() {
                 and organizational resilience
               </li>
             </ul>
-          </div>
+          </motion.div>
 
-          <blockquote className="border-l-4 border-lw-pink pl-5 italic text-gray-500 mb-8">
+          <motion.blockquote className="border-l-4 border-lw-pink pl-5 italic text-gray-500 mb-8" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
             "When someone walks through our doors, they're not just a client. They're someone's daughter. Someone's father.
             Someone's dreamer. I see the person beyond the pain, the story beyond the struggle.", Mayelin Lima
-          </blockquote>
+          </motion.blockquote>
 
-          <p className="text-gray-600 leading-relaxed">
-            Founded on over 15 years of field-tested experience, <strong className="text-lw-navy">Lifeway Center</strong> walks
+          <motion.p className="text-gray-600 leading-relaxed" initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={fadeUp}>
+            Founded on over 20 years of field-tested experience, <strong className="text-lw-navy">Lifeway Center</strong> walks
             alongside families through trauma, addiction, and grief, building bridges, not just providing services, so
             individuals and families can thrive, not just survive. Mayelin is available for speaking engagements, clinical
             trainings, and wellness consultations,{' '}
             <Link to="/contact" className="text-lw-pink font-semibold hover:underline">get in touch</Link>.
-          </p>
+          </motion.p>
         </div>
       </section>
     </div>

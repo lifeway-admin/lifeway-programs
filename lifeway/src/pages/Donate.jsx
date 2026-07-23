@@ -90,7 +90,7 @@ export default function Donate() {
             <form onSubmit={submit} className="space-y-5">
               {/* Amount presets */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Donation Amount</label>
+                <label htmlFor="donate-amount" className="block text-sm font-medium text-gray-700 mb-2">Donation Amount</label>
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   {PRESETS.map(p => (
                     <button
@@ -108,6 +108,7 @@ export default function Donate() {
                   ))}
                 </div>
                 <input
+                  id="donate-amount"
                   type="number"
                   min="1"
                   step="0.01"
@@ -123,8 +124,9 @@ export default function Donate() {
 
               {/* Campaign */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Designate My Gift To</label>
+                <label htmlFor="donate-campaign" className="block text-sm font-medium text-gray-700 mb-1.5">Designate My Gift To</label>
                 <select
+                  id="donate-campaign"
                   value={campaign}
                   onChange={e => setCampaign(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink"
@@ -137,8 +139,9 @@ export default function Donate() {
               {!anonymous && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                    <label htmlFor="donate-name" className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
                     <input
+                      id="donate-name"
                       value={name}
                       onChange={e => setName(e.target.value)}
                       placeholder="Your name"
@@ -146,8 +149,9 @@ export default function Donate() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                    <label htmlFor="donate-email" className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                     <input
+                      id="donate-email"
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}

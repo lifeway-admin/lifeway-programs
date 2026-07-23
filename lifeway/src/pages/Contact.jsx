@@ -42,7 +42,7 @@ export default function Contact() {
       </section>
 
       {/* Quick contact bar */}
-      <section className="bg-lw-pink text-white">
+      <section className="bg-lw-pink-dark text-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-center gap-8 text-sm">
           <a href="tel:8883313060" className="flex items-center gap-2 hover:text-pink-200 transition-colors font-semibold">
             <Phone size={15} /> (888) 331-3060
@@ -83,6 +83,12 @@ export default function Contact() {
                   icon: MapPin,
                   title: 'Riverview / Tampa Office',
                   lines: ['10621 Tucker Jones Rd', 'Riverview, FL 33578'],
+                },
+                {
+                  icon: Mail,
+                  title: 'Email',
+                  lines: ['support@lifewayprograms.org'],
+                  link: 'mailto:support@lifewayprograms.org',
                 },
                 {
                   icon: Mail,
@@ -129,24 +135,24 @@ export default function Contact() {
                 <h2 className="text-2xl font-bold text-lw-navy mb-6">Send a Message</h2>
                 <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
-                    <input required value={form.name} onChange={set('name')}
+                    <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
+                    <input id="contact-name" required value={form.name} onChange={set('name')}
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink focus:ring-1 focus:ring-lw-pink" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
-                    <input required type="email" value={form.email} onChange={set('email')}
+                    <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1.5">Email *</label>
+                    <input id="contact-email" required type="email" value={form.email} onChange={set('email')}
                       className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink focus:ring-1 focus:ring-lw-pink" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
-                  <input value={form.phone} onChange={set('phone')}
+                  <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                  <input id="contact-phone" value={form.phone} onChange={set('phone')}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink focus:ring-1 focus:ring-lw-pink" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">What can we help with? *</label>
-                  <select required value={form.subject} onChange={set('subject')}
+                  <label htmlFor="contact-subject" className="block text-sm font-medium text-gray-700 mb-1.5">What can we help with? *</label>
+                  <select id="contact-subject" required value={form.subject} onChange={set('subject')}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink">
                     <option value="">Select a topic...</option>
                     <option>Mental Health Services</option>
@@ -161,8 +167,8 @@ export default function Contact() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Message *</label>
-                  <textarea required rows={5} value={form.message} onChange={set('message')}
+                  <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1.5">Message *</label>
+                  <textarea id="contact-message" required rows={5} value={form.message} onChange={set('message')}
                     className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-lw-pink resize-none" />
                 </div>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}

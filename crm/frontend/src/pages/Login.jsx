@@ -20,6 +20,7 @@ export default function Login() {
       form.append('password', password)
       const { data } = await api.post('/auth/login', form)
       localStorage.setItem('token', data.access_token)
+      localStorage.setItem('role', data.role)
       navigate('/dashboard')
     } catch {
       setError('Invalid username or password')

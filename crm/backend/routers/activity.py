@@ -30,9 +30,12 @@ def list_activity(
 def log_activity(
     entry: schemas.ActivityLogCreate,
     db: Session = Depends(get_db),
-    _=Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    db_entry = models.ActivityLog(**entry.model_dump())
+    # actor is always derived from the authenticated session, never client-supplied,
+    # so the audit trail can't be forged to attribute actions to someone else.
+    data = entry.model_dump(exclude={"actor"})
+    db_entry = models.ActivityLog(**data, actor=current_user.username)
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)

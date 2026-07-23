@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ArrowRight, CheckCircle, Brain, Activity, Shield, Heart, Users, Sparkles } from 'lucide-react'
+import { fadeUp } from '../lib/animations'
 
 const services = [
   {
@@ -88,8 +90,9 @@ export default function Services() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-lw-navy text-white">
-        <div className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <section className="relative bg-lw-navy text-white overflow-hidden">
+        <div className="absolute inset-0 bg-noise pointer-events-none" />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 text-center">
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Comprehensive Holistic Care</span>
           <h1 className="text-4xl md:text-5xl font-bold mt-3 mb-5">Our Services</h1>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg leading-relaxed">
@@ -106,8 +109,16 @@ export default function Services() {
       {/* Services grid */}
       <section className="section">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {services.map(s => (
-            <div key={s.title} className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+          {services.map((s, i) => (
+            <motion.div
+              key={s.title}
+              className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+              transition={{ ...fadeUp.show.transition, delay: (i % 3) * 0.1 }}
+            >
               <div className="w-14 h-14 rounded-2xl bg-lw-pink-light flex items-center justify-center mb-5 flex-shrink-0">
                 <s.icon size={26} className="text-lw-pink" />
               </div>
@@ -121,13 +132,20 @@ export default function Services() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* Psychosocial rehab callout */}
-        <div className="bg-lw-navy rounded-3xl p-10 text-white mb-16">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+        <motion.div
+          className="relative bg-lw-navy rounded-3xl p-10 text-white mb-16 overflow-hidden"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
+          <div className="absolute inset-0 bg-noise pointer-events-none" />
+          <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
             <div>
               <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Psychosocial Rehabilitation</span>
               <h2 className="text-2xl font-bold mt-2 mb-4">Building Skills for Independent Living</h2>
@@ -144,10 +162,16 @@ export default function Services() {
               ))}
             </ul>
           </div>
-        </div>
+        </motion.div>
 
         {/* Insurance */}
-        <div className="text-center">
+        <motion.div
+          className="text-center"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Payment & Insurance</span>
           <h2 className="text-3xl font-bold text-lw-navy mt-2 mb-4">We Accept Most Insurance Plans</h2>
           <p className="text-gray-500 max-w-xl mx-auto mb-8">
@@ -169,7 +193,7 @@ export default function Services() {
               See Full List of Accepted Plans <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>
   )

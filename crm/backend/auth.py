@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import models
 import schemas
 from database import get_db
+from limiter import limiter
 
 # Must be set in .env — generate with: python3 -c "import secrets; print(secrets.token_hex(32))"
 SECRET_KEY = os.environ["JWT_SECRET_KEY"]
@@ -108,7 +109,8 @@ class ChangePasswordRequest(BaseModel):
 
 
 @auth_router.post("/change-password")
-def change_password(req: ChangePasswordRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+@limiter.limit("10/minute")
+def change_password(request: Request, req: ChangePasswordRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     if not pwd_context.verify(req.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
     if req.new_password == req.current_password:

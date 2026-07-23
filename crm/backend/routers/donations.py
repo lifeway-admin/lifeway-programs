@@ -59,7 +59,7 @@ def donation_summary(db: Session = Depends(get_db), _=Depends(get_current_user))
 
 @router.get("/export/csv")
 @limiter.limit("5/minute")
-def export_donations_csv(request: Request, db: Session = Depends(get_db), _=Depends(get_current_user)):
+def export_donations_csv(request: Request, db: Session = Depends(get_db), _=Depends(require_admin)):
     donations = db.query(models.Donation).order_by(models.Donation.donation_date.desc()).all()
 
     def generate():

@@ -32,14 +32,14 @@ const navSections = [
   {
     label: 'Management',
     items: [
-      { to: '/staff', icon: UserCheck, label: 'Staff & Volunteers' },
+      { to: '/staff', icon: UserCheck, label: 'Staff & Volunteers', adminOnly: true },
       { to: '/reports', icon: BarChart2, label: 'Reports' },
     ],
   },
   {
     label: 'System',
     items: [
-      { to: '/audit-log', icon: FileText, label: 'Audit Log' },
+      { to: '/audit-log', icon: FileText, label: 'Audit Log', adminOnly: true },
       { to: '/policies', icon: Shield, label: 'Policies' },
       { to: '/settings', icon: Settings, label: 'Settings' },
     ],
@@ -58,10 +58,12 @@ export default function Layout() {
   const [showSearch, setShowSearch] = useState(false)
   const { recentItems } = useRecentlyViewed()
   const [showHelp, setShowHelp] = useState(false)
+  const isAdmin = localStorage.getItem('role') === 'admin'
   useKeyboardShortcuts({ onSearchOpen: () => setShowSearch(true), onHelpOpen: () => setShowHelp(true), navigate })
 
   function logout() {
     localStorage.removeItem('token')
+    localStorage.removeItem('role')
     navigate('/login')
   }
 
@@ -82,7 +84,10 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 p-4 overflow-y-auto space-y-4">
-          {navSections.map((section, si) => (
+          {navSections.map((section, si) => {
+            const visibleItems = section.items.filter(item => !item.adminOnly || isAdmin)
+            if (visibleItems.length === 0) return null
+            return (
             <div key={si}>
               {section.label && (
                 <p className={`text-xs font-bold uppercase tracking-widest px-3 mb-1 ${
@@ -94,7 +99,7 @@ export default function Layout() {
                 </p>
               )}
               <div className="space-y-0.5">
-                {section.items.map(({ to, icon: Icon, label }) => (
+                {visibleItems.map(({ to, icon: Icon, label }) => (
                   <NavLink
                     key={to}
                     to={to}
@@ -121,7 +126,8 @@ export default function Layout() {
                 ))}
               </div>
             </div>
-          ))}
+            )
+          })}
         </nav>
 
         {recentItems.length > 0 && (

@@ -3,6 +3,8 @@ CLAUDE.md
 # Environment & secrets
 .env
 *.env
+.env.*
+!.env.example
 crm/backend/google_credentials.json
 crm/backend/google_token.json
 

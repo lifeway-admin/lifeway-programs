@@ -14,7 +14,7 @@ export default function CancelLookup({ t }) {
     setError('')
     setResult(null)
     try {
-      const { data } = await api.get(`/public/lookup?confirmation=${confirmNum.trim().toUpperCase()}`)
+      const { data } = await api.post('/public/lookup', { confirmation: confirmNum.trim().toUpperCase() })
       setResult(data)
     } catch {
       setError(t?.cancelNotFound || 'No appointment found with that confirmation number.')

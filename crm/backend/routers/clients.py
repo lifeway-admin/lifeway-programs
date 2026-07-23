@@ -226,8 +226,8 @@ def send_payment_request(
             },
         )
         checkout_url = session.url
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Stripe error: {e}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not create payment link. Please try again.")
 
     amount_str = f"${body.amount_cents / 100:.2f}"
 

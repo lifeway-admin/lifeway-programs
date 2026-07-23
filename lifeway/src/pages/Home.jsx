@@ -2,11 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles, Shield } from 'lucide-react'
 import { TestimonialsColumn } from '../components/ui/testimonials-columns-1'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
+import { fadeUp } from '../lib/animations'
 
 const services = [
   { icon: Brain, title: 'Mental Health', desc: 'Individual, family & group therapy. Christian counseling, trauma care, grief support, and more, for children, teens, and adults.' },
@@ -57,6 +53,7 @@ export default function Home() {
             transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
           />
         </div>
+        <div className="absolute inset-0 bg-noise pointer-events-none" />
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -115,20 +112,20 @@ export default function Home() {
 
         {/* Warm wave transition */}
         <svg viewBox="0 0 1440 48" className="block w-full" preserveAspectRatio="none" style={{ marginBottom: '-1px' }}>
-          <path fill="#e91e8c" d="M0,48 C360,0 1080,0 1440,48 L1440,48 L0,48 Z" />
+          <path fill="#fdf2f8" d="M0,48 C360,0 1080,0 1440,48 L1440,48 L0,48 Z" />
         </svg>
       </section>
 
       {/* Mission bar */}
-      <section className="bg-lw-pink text-white">
+      <section className="bg-lw-pink-light text-lw-navy">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
           <p className="font-semibold text-center md:text-left italic">
             "Linking Individuals to Their Soaring Potential", Inspired by Isaiah 40:31
           </p>
-          <div className="flex flex-wrap gap-6 text-pink-100">
-            <span className="flex items-center gap-2"><MapPin size={14} /> Homestead, FL</span>
-            <span className="flex items-center gap-2"><MapPin size={14} /> Riverview, FL</span>
-            <span className="flex items-center gap-2"><span className="text-white font-bold">📱</span> Statewide Telehealth</span>
+          <div className="flex flex-wrap gap-6 text-lw-navy/70">
+            <span className="flex items-center gap-2"><MapPin size={14} className="text-lw-pink" /> Homestead, FL</span>
+            <span className="flex items-center gap-2"><MapPin size={14} className="text-lw-pink" /> Riverview, FL</span>
+            <span className="flex items-center gap-2"><span className="font-bold">📱</span> Statewide Telehealth</span>
           </div>
         </div>
       </section>
@@ -254,7 +251,13 @@ export default function Home() {
       <section className="bg-lw-pink-light">
         <div className="section">
           {/* Header with aggregate rating */}
-          <div className="text-center mb-14">
+          <motion.div
+            className="text-center mb-14"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeUp}
+          >
             <div className="inline-flex items-center gap-2 bg-white rounded-full px-5 py-2.5 shadow-sm mb-6">
               <span className="font-bold text-lg" style={{ background: 'linear-gradient(135deg, #4285F4 25%, #EA4335 25%, #EA4335 50%, #FBBC05 50%, #FBBC05 75%, #34A853 75%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>G</span>
               <span className="text-gray-700 text-sm font-semibold">Google Reviews</span>
@@ -266,7 +269,7 @@ export default function Home() {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-lw-navy mb-3">Voices From Our Community</h2>
             <p className="text-gray-500 max-w-md mx-auto">Real experiences from the people we're honored to walk alongside</p>
-          </div>
+          </motion.div>
 
           {/* Cards, vertical auto-scrolling columns */}
           <div className="flex justify-center gap-6 mb-10 [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)] max-h-[600px] overflow-hidden">
@@ -288,37 +291,65 @@ export default function Home() {
       </section>
 
       {/* Locations */}
-      <section className="bg-lw-navy text-white">
-        <div className="section">
-          <div className="text-center mb-12">
+      <section className="relative bg-lw-navy text-white overflow-hidden">
+        <div className="absolute inset-0 bg-noise pointer-events-none" />
+        <div className="section relative z-10">
+          <motion.div
+            className="text-center mb-12"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={fadeUp}
+          >
             <span className="text-lw-pink text-sm font-semibold uppercase tracking-wider">Find Us</span>
             <h2 className="text-3xl font-bold mt-2">Come As You Are, We're Close By</h2>
             <p className="text-gray-400 mt-3 text-sm">Two welcoming locations in South Florida, plus telehealth statewide</p>
-          </div>
+          </motion.div>
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="bg-white/10 rounded-3xl p-8 hover:bg-white/15 transition-colors">
-              <MapPin size={28} className="text-lw-pink mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Homestead, FL</h3>
-              <p className="text-gray-300 text-sm">15300 SW 288th Street<br />Homestead, FL 33033</p>
-            </div>
-            <div className="bg-white/10 rounded-3xl p-8 hover:bg-white/15 transition-colors">
-              <MapPin size={28} className="text-lw-pink mx-auto mb-4" />
-              <h3 className="font-bold text-lg mb-2">Riverview, FL</h3>
-              <p className="text-gray-300 text-sm">10621 Tucker Jones Rd<br />Riverview, FL 33578</p>
-            </div>
-            <div className="bg-lw-pink/20 border border-lw-pink/30 rounded-3xl p-8">
+            {[
+              { icon: MapPin, title: 'Homestead, FL', body: <>15300 SW 288th Street<br />Homestead, FL 33033</>, cls: 'bg-white/10 hover:bg-white/15 transition-colors' },
+              { icon: MapPin, title: 'Riverview, FL', body: <>10621 Tucker Jones Rd<br />Riverview, FL 33578</>, cls: 'bg-white/10 hover:bg-white/15 transition-colors' },
+            ].map((loc, i) => (
+              <motion.div
+                key={loc.title}
+                className={`rounded-3xl p-8 ${loc.cls}`}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={fadeUp}
+                transition={{ ...fadeUp.show.transition, delay: i * 0.1 }}
+              >
+                <loc.icon size={28} className="text-lw-pink mx-auto mb-4" />
+                <h3 className="font-bold text-lg mb-2">{loc.title}</h3>
+                <p className="text-gray-300 text-sm">{loc.body}</p>
+              </motion.div>
+            ))}
+            <motion.div
+              className="bg-lw-pink/20 border border-lw-pink/30 rounded-3xl p-8"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.3 }}
+              variants={fadeUp}
+              transition={{ ...fadeUp.show.transition, delay: 0.2 }}
+            >
               <Phone size={28} className="text-lw-pink mx-auto mb-4" />
               <h3 className="font-bold text-lg mb-2">Call or Text Us</h3>
               <a href="tel:8883313060" className="text-lw-pink font-bold text-xl">(888) 331-3060</a>
               <p className="text-gray-400 text-sm mt-2">Mon–Sat · 9am–9pm</p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-lw-pink">
-        <div className="max-w-4xl mx-auto px-6 py-20 text-center text-white">
+      <section className="bg-lw-pink-dark">
+        <motion.div
+          className="max-w-4xl mx-auto px-6 py-20 text-center text-white"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">You Don't Have to Face This Alone</h2>
           <p className="text-pink-100 mb-8 text-lg max-w-xl mx-auto leading-relaxed">
             Taking that first step can feel hard. We promise to make everything after that easy, compassionate, confidential, and accessible.
@@ -332,7 +363,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-pink-200 text-sm mt-6">Same-day appointments available · No insurance required</p>
-        </div>
+        </motion.div>
       </section>
     </div>
   )

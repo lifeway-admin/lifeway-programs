@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import os
 import secrets
 from datetime import datetime, timedelta
@@ -7,7 +9,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import models, schemas
 from database import get_db
-from auth import get_current_user, require_admin, require_staff
+from auth import get_current_user, require_admin, require_staff, SECRET_KEY
 from limiter import limiter
 from pydantic import BaseModel
 
@@ -15,6 +17,28 @@ router = APIRouter(prefix="/staff", tags=["staff"])
 
 _CRM_BASE_URL = os.getenv("CRM_BASE_URL", "http://localhost:5173")
 _CREDENTIALS_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "google_credentials.json")
+
+
+def _sign_oauth_state(staff_id: int) -> str:
+    """Bind the OAuth state param to a server-issued, HMAC-signed nonce so a
+    forged state can't be used to overwrite a different staff member's
+    Google Calendar link on callback."""
+    nonce = secrets.token_urlsafe(16)
+    msg = f"{nonce}.{staff_id}"
+    sig = hmac.new(SECRET_KEY.encode(), msg.encode(), hashlib.sha256).hexdigest()
+    return f"{msg}.{sig}"
+
+
+def _verify_oauth_state(state: str) -> int:
+    try:
+        nonce, staff_id_str, sig = state.rsplit(".", 2)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid state parameter")
+    msg = f"{nonce}.{staff_id_str}"
+    expected_sig = hmac.new(SECRET_KEY.encode(), msg.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(sig, expected_sig):
+        raise HTTPException(status_code=400, detail="Invalid state parameter")
+    return int(staff_id_str)
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -148,9 +172,10 @@ def set_availability(
     staff_id: int,
     body: AvailabilityUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_staff),
 ):
-    """Staff can set their own; admins can set anyone's."""
+    """Staff can set their own; admins can set anyone's. Readonly accounts are
+    blocked by require_staff before we even get here."""
     staff = db.query(models.Staff).filter(models.Staff.id == staff_id).first()
     if not staff:
         raise HTTPException(status_code=404, detail="Staff member not found")
@@ -194,7 +219,7 @@ def my_google_status(db: Session = Depends(get_db), current_user=Depends(get_cur
 
 
 @router.get("/me/google/auth")
-def my_google_auth(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def my_google_auth(db: Session = Depends(get_db), current_user=Depends(require_staff)):
     """Start per-therapist Google OAuth. Encodes staff_id in state param."""
     from pathlib import Path
     creds_file = Path(_CREDENTIALS_FILE_PATH)
@@ -213,11 +238,11 @@ def my_google_auth(db: Session = Depends(get_db), current_user=Depends(get_curre
             scopes=gcal.SCOPES,
             redirect_uri=f"{os.getenv('API_BASE_URL', 'http://localhost:8000')}/staff/google/callback",
         )
-        state = secrets.token_urlsafe(16) + f".{staff.id}"
+        state = _sign_oauth_state(staff.id)
         auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline", state=state)
         return RedirectResponse(auth_url)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not start Google Calendar authorization.")
 
 
 @router.get("/google/callback")
@@ -228,11 +253,8 @@ def staff_google_callback(code: str, state: str, db: Session = Depends(get_db)):
     if not creds_file.exists():
         raise HTTPException(status_code=400, detail="Credentials file missing")
 
-    # Decode staff_id from state
-    try:
-        staff_id = int(state.rsplit(".", 1)[-1])
-    except (ValueError, IndexError):
-        raise HTTPException(status_code=400, detail="Invalid state parameter")
+    # Verify the signed state before trusting the staff_id embedded in it
+    staff_id = _verify_oauth_state(state)
 
     staff = db.query(models.Staff).filter(models.Staff.id == staff_id).first()
     if not staff:
@@ -248,17 +270,16 @@ def staff_google_callback(code: str, state: str, db: Session = Depends(get_db)):
         )
         flow.fetch_token(code=code)
         creds = flow.credentials
-        import json
         staff.google_refresh_token = creds.to_json()
         db.commit()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not complete Google Calendar authorization.")
 
     return RedirectResponse(f"{_CRM_BASE_URL}/my-schedule?calendar=connected")
 
 
 @router.delete("/me/google/disconnect")
-def my_google_disconnect(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def my_google_disconnect(db: Session = Depends(get_db), current_user=Depends(require_staff)):
     staff = db.query(models.Staff).filter(models.Staff.email == current_user.email).first()
     if not staff:
         raise HTTPException(status_code=404, detail="Staff member not found")

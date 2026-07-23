@@ -30,9 +30,6 @@ export default function AIAgent() {
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }))
 
   async function generate() {
-    if (!import.meta.env.VITE_OPENAI_KEY && !result) {
-      // Demo mode — call backend proxy
-    }
     setLoading(true)
     setResult('')
     try {

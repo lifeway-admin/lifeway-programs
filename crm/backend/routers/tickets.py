@@ -3,7 +3,7 @@ import io
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -12,6 +12,7 @@ import models
 import schemas
 from auth import get_current_user, require_staff, require_admin
 from database import get_db
+from limiter import limiter
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
@@ -98,7 +99,8 @@ def ticket_stats(db: Session = Depends(get_db), _=Depends(get_current_user)):
 
 
 @router.get("/export/csv")
-def export_tickets_csv(db: Session = Depends(get_db), _=Depends(get_current_user)):
+@limiter.limit("5/minute")
+def export_tickets_csv(request: Request, db: Session = Depends(get_db), _=Depends(require_admin)):
     tickets = db.query(models.Ticket).order_by(models.Ticket.created_at.desc()).all()
 
     def generate():
@@ -163,9 +165,12 @@ def list_tickets(
 def create_ticket(
     ticket: schemas.TicketCreate,
     db: Session = Depends(get_db),
-    _=Depends(require_staff),
+    current_user=Depends(require_staff),
 ):
-    db_ticket = models.Ticket(**ticket.model_dump())
+    # created_by is always derived from the authenticated session, not client input,
+    # so a staff account can't attribute a ticket to a different staff member.
+    data = ticket.model_dump(exclude={"created_by"})
+    db_ticket = models.Ticket(**data, created_by=current_user.full_name or current_user.username)
     db.add(db_ticket)
     db.commit()
     db.refresh(db_ticket)
@@ -226,12 +231,14 @@ def add_comment(
     ticket_id: int,
     comment: schemas.TicketCommentCreate,
     db: Session = Depends(get_db),
-    _=Depends(require_staff),
+    current_user=Depends(require_staff),
 ):
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    db_comment = models.TicketComment(ticket_id=ticket_id, **comment.model_dump())
+    # author is always derived from the authenticated session, not client input.
+    data = comment.model_dump(exclude={"author"})
+    db_comment = models.TicketComment(ticket_id=ticket_id, **data, author=current_user.full_name or current_user.username)
     db.add(db_comment)
     db.commit()
     db.refresh(db_comment)

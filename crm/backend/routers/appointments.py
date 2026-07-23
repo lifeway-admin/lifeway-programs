@@ -220,7 +220,7 @@ def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(ge
 
 
 @router.delete("/series/{group_id}")
-def delete_appointment_series(group_id: str, db: Session = Depends(get_db), current_user=Depends(require_staff)):
+def delete_appointment_series(group_id: str, db: Session = Depends(get_db), current_user=Depends(require_admin)):
     deleted = db.query(models.Appointment).filter(models.Appointment.recurrence_group_id == group_id).delete()
     db.commit()
     return {"deleted": deleted}
