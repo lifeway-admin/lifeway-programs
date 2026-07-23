@@ -1452,8 +1452,21 @@ export default function App() {
   }
 
   const handleBack = () => {
-    if (step > 1 && step < 6) setStep(s => s - 1)
+    if (entry === 'category') {
+      setEntry('gateway')
+      setPatientType(null)
+      return
+    }
+    if (entry === 'wizard') {
+      if (step === 1) {
+        setEntry('category')
+        return
+      }
+      if (step < 6) setStep(s => s - 1)
+    }
   }
+
+  const showBack = entry === 'category' || (entry === 'wizard' && step < 6)
 
   const handleEntrySelect = (type) => {
     setPatientType(type)
@@ -1491,7 +1504,7 @@ export default function App() {
           </div>
         )}
 
-        {entry === 'wizard' && step > 1 && step < 6 && (
+        {showBack && (
           <button
             onClick={handleBack}
             className="flex items-center gap-1 text-gray-500 hover:text-lifeway-pink mb-4 text-sm font-medium transition-colors"
