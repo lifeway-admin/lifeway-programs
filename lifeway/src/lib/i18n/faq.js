@@ -51,7 +51,7 @@ export default {
         items: [
           {
             q: 'Do you offer telehealth?',
-            a: "Yes. We offer secure telehealth video sessions via Google Meet statewide across Florida. Telehealth is available for mental health counseling, psychiatric services, and medical consultations. You'll receive a Google Meet link after booking.",
+            a: "Yes. We offer secure telehealth video sessions via Google Meet statewide across Florida. Telehealth is available for mental health counseling and medical consultations. You'll receive a Google Meet link after booking.",
           },
           {
             q: 'Do you provide services in Spanish?',
@@ -142,7 +142,7 @@ export default {
         items: [
           {
             q: '¿Ofrecen telesalud?',
-            a: 'Sí. Ofrecemos sesiones de video seguras de telesalud a través de Google Meet en todo Florida. La telesalud está disponible para consejería de salud mental, servicios psiquiátricos y consultas médicas. Recibirá un enlace de Google Meet después de reservar.',
+            a: 'Sí. Ofrecemos sesiones de video seguras de telesalud a través de Google Meet en todo Florida. La telesalud está disponible para consejería de salud mental y consultas médicas. Recibirá un enlace de Google Meet después de reservar.',
           },
           {
             q: '¿Ofrecen servicios en español?',

@@ -23,15 +23,11 @@ export default {
       { name: 'German Alfaro', title: 'Clinical Director, LMHC, MS' },
       { name: 'Maria Reyes', title: 'Revenue Cycle Specialist, MHSA' },
       { name: 'Mayelin Lima', title: 'Licensed Clinical Social Worker, President/CEO' },
-      { name: 'Ydania Peralta', title: null },
     ],
     medical: [
       { name: 'Misael Gonzalez', title: 'Medical Director, M.D.' },
-      { name: 'Neyma Perez-Suarez', title: null },
       { name: 'Richard E. Arevalo', title: 'Family Nurse Practitioner, MSN' },
-      { name: 'Sam Moss', title: null },
       { name: 'Yisel Neyra Fajadro', title: 'MSN, APRN, FNP-C' },
-      { name: 'Barbara Mojena', title: null },
     ],
     getInvolvedCards: [
       { title: 'Careers', desc: "Explore open roles across clinical, medical, and support positions, we're always looking for compassionate professionals to join our mission." },
@@ -63,15 +59,11 @@ export default {
       { name: 'German Alfaro', title: 'Director Clínico, LMHC, MS' },
       { name: 'Maria Reyes', title: 'Especialista en Ciclo de Ingresos, MHSA' },
       { name: 'Mayelin Lima', title: 'Trabajadora Social Clínica Licenciada, Presidenta/Directora Ejecutiva' },
-      { name: 'Ydania Peralta', title: null },
     ],
     medical: [
       { name: 'Misael Gonzalez', title: 'Director Médico, M.D.' },
-      { name: 'Neyma Perez-Suarez', title: null },
       { name: 'Richard E. Arevalo', title: 'Enfermero Familiar de Práctica Avanzada, MSN' },
-      { name: 'Sam Moss', title: null },
       { name: 'Yisel Neyra Fajadro', title: 'MSN, APRN, FNP-C' },
-      { name: 'Barbara Mojena', title: null },
     ],
     getInvolvedCards: [
       { title: 'Carreras', desc: 'Explore vacantes en posiciones clínicas, médicas y de apoyo, siempre buscamos profesionales compasivos que se unan a nuestra misión.' },

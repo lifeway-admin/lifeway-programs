@@ -17,7 +17,7 @@ export default {
     faithCommunityBody: 'Inspired by Isaiah 40:31 and active in church ministry, she leads workshops on faith-based mental health, leadership development, family therapy, and organizational resilience',
     quote: 'When someone walks through our doors, they\'re not just a client. They\'re someone\'s daughter. Someone\'s father. Someone\'s dreamer. I see the person beyond the pain, the story beyond the struggle.',
     closing1: 'Founded on over 20 years of field-tested experience,',
-    closing2: 'walks alongside families through trauma, addiction, and grief, building bridges, not just providing services, so individuals and families can thrive, not just survive. Mayelin is available for speaking engagements, clinical trainings, and wellness consultations,',
+    closing2: 'walks alongside families through trauma and grief, building bridges, not just providing services, so individuals and families can thrive, not just survive. Mayelin is available for speaking engagements, clinical trainings, and wellness consultations,',
     getInTouch: 'get in touch',
   },
   es: {
@@ -38,7 +38,7 @@ export default {
     faithCommunityBody: 'Inspirada por Isaías 40:31 y activa en el ministerio de la iglesia, dirige talleres sobre salud mental basada en la fe, desarrollo de liderazgo, terapia familiar y resiliencia organizacional',
     quote: 'Cuando alguien cruza nuestras puertas, no es solo un cliente. Es la hija de alguien. El padre de alguien. El soñador de alguien. Veo a la persona más allá del dolor, la historia más allá de la lucha.',
     closing1: 'Fundado sobre más de 20 años de experiencia probada en el campo,',
-    closing2: 'camina junto a las familias a través del trauma, la adicción y el duelo, construyendo puentes, no solo brindando servicios, para que individuos y familias puedan prosperar, no solo sobrevivir. Mayelin está disponible para conferencias, capacitaciones clínicas y consultas de bienestar,',
+    closing2: 'camina junto a las familias a través del trauma y el duelo, construyendo puentes, no solo brindando servicios, para que individuos y familias puedan prosperar, no solo sobrevivir. Mayelin está disponible para conferencias, capacitaciones clínicas y consultas de bienestar,',
     getInTouch: 'póngase en contacto',
   },
 }

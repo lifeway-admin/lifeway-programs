@@ -892,7 +892,7 @@ function ConsentModal({ onSign, onClose, t, lang }) {
 
           <section>
             <h3 className="font-bold text-gray-900 text-base mb-2">{h[0]}</h3>
-            <p>By completing this booking, I voluntarily request and consent to receive services from Lifeway Programs, Inc., a nonprofit mental health and community wellness organization. I understand that services may include individual counseling, family therapy, group therapy, case management, psychiatric evaluation, substance abuse counseling, and other related support services as recommended by my assigned provider.</p>
+            <p>By completing this booking, I voluntarily request and consent to receive services from Lifeway Programs, Inc., a nonprofit mental health and community wellness organization. I understand that services may include individual counseling, family therapy, group therapy, case management, and other related support services as recommended by my assigned provider.</p>
             <p className="mt-2">I understand that my participation in services is voluntary and that I may withdraw my consent at any time. I acknowledge that no specific outcomes can be guaranteed, and that treatment goals will be discussed and agreed upon with my provider.</p>
           </section>
 
@@ -934,7 +934,7 @@ function ConsentModal({ onSign, onClose, t, lang }) {
 
           <section>
             <h3 className="font-bold text-gray-900 text-base mb-2">{h[5]}</h3>
-            <p>In the event of a psychiatric or medical emergency during a session or on the premises, Lifeway Programs staff are authorized to contact emergency services (911) on your behalf. I authorize Lifeway Programs to contact my designated emergency contact in the event of a safety concern or medical emergency where I am unable to communicate on my own behalf.</p>
+            <p>In the event of a mental health or medical emergency during a session or on the premises, Lifeway Programs staff are authorized to contact emergency services (911) on your behalf. I authorize Lifeway Programs to contact my designated emergency contact in the event of a safety concern or medical emergency where I am unable to communicate on my own behalf.</p>
           </section>
 
           <section>

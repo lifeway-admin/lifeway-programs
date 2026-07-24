@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle, Brain, Activity, Shield, Heart, Users, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle, Brain, Heart, Users, Sparkles } from 'lucide-react'
 import { fadeUp } from '../lib/animations'
 import { useLanguage } from '../context/LanguageContext'
 import i18n from '../lib/i18n/services'
 
-const SERVICE_ICONS = [Brain, Activity, Shield, Heart, Users, Sparkles]
+const SERVICE_ICONS = [Brain, Heart, Users, Sparkles]
 
 export default function Services() {
   const { lang } = useLanguage()

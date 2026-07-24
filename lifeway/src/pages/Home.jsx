@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles, Shield } from 'lucide-react'
+import { Phone, MapPin, Clock, ArrowRight, CheckCircle, Star, Heart, Calendar, Brain, Activity, Users, Briefcase, Sparkles } from 'lucide-react'
 import { TestimonialsColumn } from '../components/ui/testimonials-columns-1'
 import { fadeUp } from '../lib/animations'
 import { useLanguage } from '../context/LanguageContext'
 import i18n from '../lib/i18n/home'
 
-const SERVICE_ICONS = [Brain, Activity, Users, Briefcase, Sparkles, Shield]
+const SERVICE_ICONS = [Brain, Activity, Users, Briefcase, Sparkles]
 const ACCESS_ICONS = [Calendar, Clock, Phone, Heart]
 
 // Real Google reviews, kept in the reviewer's original words regardless of site language.

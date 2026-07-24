@@ -14,7 +14,7 @@ const pages = {
     },
     '/services': {
       title: 'Our Services | LifeWay Center',
-      description: 'Explore LifeWay Center\'s full range of services: mental health counseling, psychiatry, addiction recovery, medical and wellness care, and social services.',
+      description: 'Explore LifeWay Center\'s full range of services: mental health counseling, medical and wellness care, and social services.',
     },
     '/insurances': {
       title: 'Insurances Accepted | LifeWay Center',
@@ -64,7 +64,7 @@ const pages = {
     },
     '/services': {
       title: 'Nuestros Servicios | LifeWay Center',
-      description: 'Explore la gama completa de servicios de LifeWay Center: consejería de salud mental, psiquiatría, recuperación de adicciones, atención médica y de bienestar, y servicios sociales.',
+      description: 'Explore la gama completa de servicios de LifeWay Center: consejería de salud mental, atención médica y de bienestar, y servicios sociales.',
     },
     '/insurances': {
       title: 'Seguros Aceptados | LifeWay Center',

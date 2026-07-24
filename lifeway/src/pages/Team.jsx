@@ -10,8 +10,8 @@ const GET_INVOLVED_ICONS = [Briefcase, Handshake, GraduationCap]
 
 const BOARD_PHOTOS = ['/images/team/mayelin-lima.jpg', '/images/team/laura-dahne.jpg', '/images/team/timothy-tyler.jpg']
 const EXEC_PHOTOS = ['/images/team/mayelin-lima.jpg', '/images/team/jack-hakimian.jpg']
-const DIRECTOR_PHOTOS = ['/images/team/german-alfaro.jpg', '/images/team/maria-reyes.jpg', '/images/team/mayelin-lima.jpg', null]
-const MEDICAL_PHOTOS = ['/images/team/misael-gonzalez.jpg', null, '/images/team/richard-arevalo.jpg', null, '/images/team/yisel-neyra-fajadro.jpg', null]
+const DIRECTOR_PHOTOS = ['/images/team/german-alfaro.jpg', '/images/team/maria-reyes.jpg', '/images/team/mayelin-lima.jpg']
+const MEDICAL_PHOTOS = ['/images/team/misael-gonzalez.jpg', '/images/team/richard-arevalo.jpg', '/images/team/yisel-neyra-fajadro.jpg']
 
 function withPhotos(people, photos) {
   return people.map((p, i) => ({ ...p, photo: photos[i] }))

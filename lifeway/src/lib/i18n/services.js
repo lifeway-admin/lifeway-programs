@@ -3,7 +3,7 @@ export default {
     eyebrow: 'Comprehensive Holistic Care',
     title: 'Our Services',
     subtitle: 'We offer a full spectrum of mental health, medical, social, and spiritual services, accessible and affordable, because dignity should never have a price tag.',
-    tags: ['Mental Health', 'Medical', 'Wellness', 'Social Services', 'Spiritual Care', 'Addiction Recovery'],
+    tags: ['Mental Health', 'Medical', 'Wellness', 'Social Services', 'Spiritual Care'],
     services: [
       {
         key: 'mentalHealth',
@@ -18,30 +18,6 @@ export default {
           'Parenting Support',
           "Men's & Women's Support Groups",
           'Group Therapy',
-        ],
-      },
-      {
-        key: 'psychiatry',
-        title: 'Psychiatry & Case Management',
-        desc: 'Comprehensive psychiatric and care coordination services to support your mental and overall health.',
-        items: [
-          'Psychiatric Evaluations',
-          'Medication Management',
-          'ARNP Services for Adults',
-          'Case Management (housing, finances, medical)',
-          'Community Referral Services',
-        ],
-      },
-      {
-        key: 'addiction',
-        title: 'Addiction Recovery & Dual Diagnosis',
-        desc: 'Structured outpatient programs with clinical and spiritual support for lasting recovery.',
-        items: [
-          'Individual Outpatient Substance Abuse Counseling',
-          'Intensive Outpatient Program (IOP), 9+ hrs/week',
-          '12-Step Program Referrals (AA, NA, Al-Anon)',
-          'Co-Occurring Mental Health & Substance Use Support',
-          'Relapse Prevention',
         ],
       },
       {
@@ -87,7 +63,7 @@ export default {
     rehabEyebrow: 'Psychosocial Rehabilitation',
     rehabTitle: 'Building Skills for Independent Living',
     rehabBody: 'Our psychosocial rehabilitation program helps individuals develop life skills, integrate into the community, and work toward vocational goals, all with clinical guidance and compassionate support.',
-    rehabItems: ['Life Skills & Independent Living Support', 'Community Integration', 'Vocational Referrals', 'Behavioral Health Education', 'Relapse Prevention'],
+    rehabItems: ['Life Skills & Independent Living Support', 'Community Integration', 'Vocational Referrals', 'Behavioral Health Education'],
     insuranceEyebrow: 'Payment & Insurance',
     insuranceTitle: 'We Accept Most Insurance Plans',
     insuranceBody1: 'We accept Medicaid, Medicare, and select private insurance. Sliding scale fees, scholarships, and cash pay options are available so cost is never a barrier to care. Not sure if your plan is active or accepted?',
@@ -101,7 +77,7 @@ export default {
     eyebrow: 'Atención Integral Holística',
     title: 'Nuestros Servicios',
     subtitle: 'Ofrecemos una gama completa de servicios de salud mental, médicos, sociales y espirituales, accesibles y asequibles, porque la dignidad nunca debe tener un precio.',
-    tags: ['Salud Mental', 'Médico', 'Bienestar', 'Servicios Sociales', 'Cuidado Espiritual', 'Recuperación de Adicciones'],
+    tags: ['Salud Mental', 'Médico', 'Bienestar', 'Servicios Sociales', 'Cuidado Espiritual'],
     services: [
       {
         key: 'mentalHealth',
@@ -116,30 +92,6 @@ export default {
           'Apoyo para Padres',
           'Grupos de Apoyo para Hombres y Mujeres',
           'Terapia Grupal',
-        ],
-      },
-      {
-        key: 'psychiatry',
-        title: 'Psiquiatría y Gestión de Casos',
-        desc: 'Servicios integrales de psiquiatría y coordinación de atención para apoyar su salud mental y general.',
-        items: [
-          'Evaluaciones Psiquiátricas',
-          'Manejo de Medicamentos',
-          'Servicios de ARNP para Adultos',
-          'Gestión de Casos (vivienda, finanzas, médico)',
-          'Servicios de Referencia Comunitaria',
-        ],
-      },
-      {
-        key: 'addiction',
-        title: 'Recuperación de Adicciones y Diagnóstico Dual',
-        desc: 'Programas ambulatorios estructurados con apoyo clínico y espiritual para una recuperación duradera.',
-        items: [
-          'Consejería Individual Ambulatoria de Abuso de Sustancias',
-          'Programa Intensivo Ambulatorio (IOP), 9+ horas/semana',
-          'Referencias a Programas de 12 Pasos (AA, NA, Al-Anon)',
-          'Apoyo para Salud Mental y Uso de Sustancias Concurrentes',
-          'Prevención de Recaídas',
         ],
       },
       {
@@ -185,7 +137,7 @@ export default {
     rehabEyebrow: 'Rehabilitación Psicosocial',
     rehabTitle: 'Desarrollando Habilidades para la Vida Independiente',
     rehabBody: 'Nuestro programa de rehabilitación psicosocial ayuda a las personas a desarrollar habilidades para la vida, integrarse a la comunidad y trabajar hacia metas vocacionales, todo con orientación clínica y apoyo compasivo.',
-    rehabItems: ['Habilidades para la Vida y Apoyo para Vivienda Independiente', 'Integración Comunitaria', 'Referencias Vocacionales', 'Educación en Salud Conductual', 'Prevención de Recaídas'],
+    rehabItems: ['Habilidades para la Vida y Apoyo para Vivienda Independiente', 'Integración Comunitaria', 'Referencias Vocacionales', 'Educación en Salud Conductual'],
     insuranceEyebrow: 'Pago y Seguros',
     insuranceTitle: 'Aceptamos la Mayoría de los Planes de Seguro',
     insuranceBody1: 'Aceptamos Medicaid, Medicare y seguros privados selectos. Hay tarifas según ingresos, becas y opciones de pago en efectivo disponibles para que el costo nunca sea una barrera para la atención. ¿No está seguro si su plan está activo o es aceptado?',
