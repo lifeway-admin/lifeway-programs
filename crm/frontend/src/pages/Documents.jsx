@@ -30,13 +30,26 @@ function UploadModal({ onSave, onClose, toast }) {
     e.preventDefault()
     if (!file) return
     setSubmitting(true)
-    const formData = new FormData()
-    formData.append('title', title)
-    formData.append('category', category)
-    formData.append('description', description)
-    formData.append('file', file)
     try {
-      await api.post('/hr-documents/', formData)
+      const { data: presigned } = await api.post('/hr-documents/presign-upload', {
+        filename: file.name,
+        content_type: file.type || 'application/octet-stream',
+      })
+
+      const uploadForm = new FormData()
+      Object.entries(presigned.upload_fields).forEach(([key, value]) => uploadForm.append(key, value))
+      uploadForm.append('file', file) // must be appended last for S3-compatible form uploads
+
+      const uploadRes = await fetch(presigned.upload_url, { method: 'POST', body: uploadForm })
+      if (!uploadRes.ok) throw new Error('Upload to storage failed')
+
+      await api.post('/hr-documents/confirm', {
+        title,
+        description,
+        category,
+        stored_filename: presigned.stored_filename,
+        original_filename: file.name,
+      })
       toast('Document uploaded.', 'success')
       onSave()
     } catch (err) {
@@ -77,7 +90,7 @@ function UploadModal({ onSave, onClose, toast }) {
               onChange={e => setFile(e.target.files?.[0] || null)}
               required
             />
-            <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, PowerPoint, images, or text. Max 25 MB.</p>
+            <p className="text-xs text-gray-400 mt-1">PDF, Word, Excel, PowerPoint, images, or text. Max 1 GB.</p>
           </div>
           <div className="flex gap-3 justify-end pt-2">
             <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
@@ -159,13 +172,8 @@ export default function Documents() {
 
   async function download(doc) {
     try {
-      const res = await api.get(`/hr-documents/${doc.id}/download`, { responseType: 'blob' })
-      const blob = new Blob([res.data])
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = doc.original_filename
-      a.click()
-      URL.revokeObjectURL(a.href)
+      const { data } = await api.get(`/hr-documents/${doc.id}/download`)
+      window.location.href = data.download_url
     } catch {
       toast('Failed to download document.', 'error')
     }

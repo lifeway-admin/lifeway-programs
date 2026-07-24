@@ -2,25 +2,21 @@ import os
 from uuid import uuid4
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from botocore.exceptions import ClientError
 
 import models
 import schemas
+import r2_storage
 from auth import get_current_user, require_admin
 from database import get_db
 from limiter import limiter
-from security_utils import safe_join
 
 router = APIRouter(prefix="/hr-documents", tags=["hr-documents"])
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads", "hr_documents")
-UPLOAD_DIR = os.path.normpath(UPLOAD_DIR)
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".png", ".jpg", ".jpeg", ".txt", ".md"}
-MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024  # 25 MB
+MAX_FILE_SIZE_BYTES = 1024 * 1024 * 1024  # 1 GB — enforced by R2 via the presigned POST policy
 
 
 @router.get("/", response_model=List[schemas.HRDocumentOut])
@@ -35,49 +31,55 @@ def list_documents(
     return q.order_by(models.HRDocument.category, models.HRDocument.title).all()
 
 
-@router.post("/", response_model=schemas.HRDocumentOut, status_code=201)
+@router.post("/presign-upload", response_model=schemas.HRDocumentPresignOut)
 @limiter.limit("20/hour")
-async def upload_document(
+def presign_upload(
     request: Request,
-    title: str = Form(...),
-    category: str = Form(...),
-    description: Optional[str] = Form(None),
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user=Depends(require_admin),
+    body: schemas.HRDocumentPresignRequest,
+    _=Depends(require_admin),
 ):
-    ext = os.path.splitext(file.filename or "")[1].lower()
+    ext = os.path.splitext(body.filename or "")[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"File type '{ext}' not allowed")
 
     stored_filename = f"{uuid4().hex}{ext}"
-    dest_path = os.path.join(UPLOAD_DIR, stored_filename)
-
-    size = 0
     try:
-        with open(dest_path, "wb") as out:
-            while chunk := await file.read(1024 * 1024):
-                size += len(chunk)
-                if size > MAX_FILE_SIZE_BYTES:
-                    out.close()
-                    os.remove(dest_path)
-                    raise HTTPException(status_code=413, detail="File exceeds 25 MB limit")
-                out.write(chunk)
-    except HTTPException:
-        raise
+        presigned = r2_storage.generate_presigned_post(
+            key=stored_filename,
+            content_type=body.content_type or "application/octet-stream",
+            max_size_bytes=MAX_FILE_SIZE_BYTES,
+        )
     except Exception:
-        if os.path.exists(dest_path):
-            os.remove(dest_path)
-        raise HTTPException(status_code=500, detail="Failed to save file")
+        raise HTTPException(status_code=503, detail="File storage is not available right now")
+
+    return schemas.HRDocumentPresignOut(
+        upload_url=presigned["url"],
+        upload_fields=presigned["fields"],
+        stored_filename=stored_filename,
+    )
+
+
+@router.post("/confirm", response_model=schemas.HRDocumentOut, status_code=201)
+def confirm_upload(
+    body: schemas.HRDocumentConfirm,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin),
+):
+    try:
+        head = r2_storage.head_object(body.stored_filename)
+    except ClientError:
+        raise HTTPException(status_code=400, detail="Upload not found — it may not have completed")
+    except Exception:
+        raise HTTPException(status_code=503, detail="File storage is not available right now")
 
     doc = models.HRDocument(
-        title=title,
-        description=description,
-        category=category,
-        original_filename=os.path.basename(file.filename or stored_filename),
-        stored_filename=stored_filename,
-        content_type=file.content_type,
-        file_size_bytes=size,
+        title=body.title,
+        description=body.description,
+        category=body.category,
+        original_filename=body.original_filename,
+        stored_filename=body.stored_filename,
+        content_type=head.get("ContentType"),
+        file_size_bytes=head.get("ContentLength", 0),
         uploaded_by=current_user.full_name or current_user.username,
     )
     db.add(doc)
@@ -92,12 +94,10 @@ def download_document(doc_id: int, db: Session = Depends(get_db), _=Depends(get_
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     try:
-        path = safe_join(UPLOAD_DIR, doc.stored_filename)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid file reference")
-    if not os.path.isfile(path):
-        raise HTTPException(status_code=404, detail="File missing on disk")
-    return FileResponse(path, media_type=doc.content_type, filename=doc.original_filename)
+        url = r2_storage.generate_presigned_download_url(doc.stored_filename, doc.original_filename)
+    except Exception:
+        raise HTTPException(status_code=503, detail="File storage is not available right now")
+    return {"download_url": url}
 
 
 @router.patch("/{doc_id}", response_model=schemas.HRDocumentOut)
@@ -123,10 +123,8 @@ def delete_document(doc_id: int, db: Session = Depends(get_db), _=Depends(requir
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     try:
-        path = safe_join(UPLOAD_DIR, doc.stored_filename)
-        if os.path.isfile(path):
-            os.remove(path)
-    except (ValueError, OSError):
-        pass
+        r2_storage.delete_object(doc.stored_filename)
+    except Exception:
+        pass  # DB row is the source of truth for the UI; don't block delete on a storage hiccup
     db.delete(doc)
     db.commit()

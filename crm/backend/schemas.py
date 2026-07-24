@@ -311,6 +311,22 @@ class HRDocumentOut(BaseModel):
     class Config:
         from_attributes = True
 
+class HRDocumentPresignRequest(BaseModel):
+    filename: str
+    content_type: str
+
+class HRDocumentPresignOut(BaseModel):
+    upload_url: str
+    upload_fields: dict
+    stored_filename: str
+
+class HRDocumentConfirm(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: str
+    stored_filename: str
+    original_filename: str
+
 
 # ── Onboarding ────────────────────────────────────────────────────────────────
 
