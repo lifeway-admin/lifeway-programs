@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import AnnouncementBar from './components/AnnouncementBar'
 import MobileCallButton from './components/MobileCallButton'
+import ChatWidget from './components/ChatWidget'
 import ScrollToTop from './components/ScrollToTop'
 import PageTitle from './components/PageTitle'
 import Home from './pages/Home'
@@ -47,6 +48,7 @@ export default function App() {
           </main>
           <Footer />
           <MobileCallButton />
+          <ChatWidget />
           <ScrollToTop />
         </div>
       </BrowserRouter>

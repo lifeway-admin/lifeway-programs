@@ -14,21 +14,27 @@ const ROLE_COLORS = {
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-function StaffForm({ initial, onSave, onClose, toast }) {
+function StaffForm({ initial, allStaff, onSave, onClose, toast }) {
   const [form, setForm] = useState(initial || {
     first_name: '', last_name: '', email: '', phone: '',
     role: 'therapist', department: '', title: '',
     is_active: true, is_volunteer: false, bio: '',
+    manager_id: '', pto_balance_hours: 0,
   })
 
   async function submit(e) {
     e.preventDefault()
+    const payload = {
+      ...form,
+      manager_id: form.manager_id ? parseInt(form.manager_id) : null,
+      pto_balance_hours: form.pto_balance_hours === '' ? 0 : parseFloat(form.pto_balance_hours),
+    }
     try {
       if (initial?.id) {
-        await api.patch(`/staff/${initial.id}`, form)
+        await api.patch(`/staff/${initial.id}`, payload)
         toast('Staff member updated.', 'success')
       } else {
-        await api.post('/staff/', form)
+        await api.post('/staff/', payload)
         toast('Staff member added.', 'success')
       }
       onSave()
@@ -65,6 +71,19 @@ function StaffForm({ initial, onSave, onClose, toast }) {
           </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Department</label><input className="input" value={form.department} onChange={set('department')} /></div>
           <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Title</label><input className="input" value={form.title} onChange={set('title')} /></div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reports To</label>
+            <select className="input" value={form.manager_id || ''} onChange={set('manager_id')}>
+              <option value="">None</option>
+              {(allStaff || []).filter(s => s.id !== initial?.id).map(s => (
+                <option key={s.id} value={s.id}>{s.first_name} {s.last_name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">PTO Balance (hours)</label>
+            <input className="input" type="number" step="0.5" min="0" value={form.pto_balance_hours ?? 0} onChange={set('pto_balance_hours')} />
+          </div>
           <div className="col-span-2 flex gap-6">
             <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
               <input type="checkbox" checked={form.is_active} onChange={toggle('is_active')} className="rounded" /> Active
@@ -335,7 +354,7 @@ export default function Staff() {
         ))}
       </div>
 
-      {showForm && <StaffForm initial={editing} onSave={() => { setShowForm(false); load() }} onClose={() => setShowForm(false)} toast={toast} />}
+      {showForm && <StaffForm initial={editing} allStaff={staff} onSave={() => { setShowForm(false); load() }} onClose={() => setShowForm(false)} toast={toast} />}
       {showInvite && <InviteModal onClose={() => setShowInvite(false)} toast={toast} />}
       {availFor && <AvailabilityModal staff={availFor} onClose={() => setAvailFor(null)} toast={toast} />}
     </div>

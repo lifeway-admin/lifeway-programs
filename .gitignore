@@ -12,6 +12,9 @@ crm/backend/google_token.json
 *.db
 *.sqlite
 
+# Uploaded runtime files
+crm/backend/uploads/
+
 # Python
 __pycache__/
 *.pyc

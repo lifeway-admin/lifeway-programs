@@ -1,15 +1,18 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   LayoutDashboard, Users, Calendar, DollarSign,
   UserCheck, Sparkles, LogOut, Heart, Tag,
   Search, Home, BarChart2, Clock, FileText, Shield, Settings, CalendarDays,
+  Users2, FolderOpen, ListChecks, CalendarOff, MessageCircle,
 } from 'lucide-react'
 import GlobalSearch from './GlobalSearch'
 import GoogleCalendarStatus from './GoogleCalendarStatus'
 import { useRecentlyViewed } from '../context/RecentlyViewedContext'
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts'
 import SessionTimeoutWarning from './SessionTimeoutWarning'
+import { useToast } from '../context/ToastContext'
+import api from '../api'
 
 const navSections = [
   {
@@ -27,6 +30,7 @@ const navSections = [
       { to: '/appointments', icon: Calendar, label: 'Appointments' },
       { to: '/donations', icon: DollarSign, label: 'Donations' },
       { to: '/tickets', icon: Tag, label: 'Tickets' },
+      { to: '/live-chat', icon: MessageCircle, label: 'Live Chat' },
     ],
   },
   {
@@ -34,6 +38,15 @@ const navSections = [
     items: [
       { to: '/staff', icon: UserCheck, label: 'Staff & Volunteers', adminOnly: true },
       { to: '/reports', icon: BarChart2, label: 'Reports' },
+    ],
+  },
+  {
+    label: 'HR',
+    items: [
+      { to: '/directory', icon: Users2, label: 'Directory' },
+      { to: '/documents', icon: FolderOpen, label: 'Documents' },
+      { to: '/onboarding', icon: ListChecks, label: 'Onboarding' },
+      { to: '/time-off', icon: CalendarOff, label: 'Time Off' },
     ],
   },
   {
@@ -59,7 +72,32 @@ export default function Layout() {
   const { recentItems } = useRecentlyViewed()
   const [showHelp, setShowHelp] = useState(false)
   const isAdmin = localStorage.getItem('role') === 'admin'
+  const { toast } = useToast()
+  const [waitingChatCount, setWaitingChatCount] = useState(0)
+  const prevWaitingCountRef = useRef(0)
+  const primedRef = useRef(false)
   useKeyboardShortcuts({ onSearchOpen: () => setShowSearch(true), onHelpOpen: () => setShowHelp(true), navigate })
+
+  useEffect(() => {
+    let cancelled = false
+    async function pollWaitingCount() {
+      try {
+        const { data } = await api.get('/chat/sessions/count', { params: { status: 'waiting' } })
+        if (cancelled) return
+        // Don't toast on the very first poll — that would fire for a pre-existing
+        // backlog at login, not a genuinely new arrival.
+        if (primedRef.current && data.count > prevWaitingCountRef.current) {
+          toast('New chat waiting', 'info')
+        }
+        primedRef.current = true
+        prevWaitingCountRef.current = data.count
+        setWaitingChatCount(data.count)
+      } catch {}
+    }
+    pollWaitingCount()
+    const interval = setInterval(pollWaitingCount, 12000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [])
 
   function logout() {
     localStorage.removeItem('token')
@@ -117,6 +155,11 @@ export default function Layout() {
                   >
                     <Icon size={18} />
                     <span>{label}</span>
+                    {to === '/live-chat' && waitingChatCount > 0 && (
+                      <span className="ml-auto text-[10px] font-bold bg-lifeway-pink text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center">
+                        {waitingChatCount}
+                      </span>
+                    )}
                     {section.dev && (
                       <span className="ml-auto text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 rounded px-1.5 py-0.5 leading-none">
                         WIP

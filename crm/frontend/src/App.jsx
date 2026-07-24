@@ -22,6 +22,11 @@ import Policies from './pages/Policies'
 import Settings from './pages/Settings'
 import MySchedule from './pages/MySchedule'
 import AcceptInvite from './pages/AcceptInvite'
+import Directory from './pages/Directory'
+import Documents from './pages/Documents'
+import Onboarding from './pages/Onboarding'
+import TimeOff from './pages/TimeOff'
+import LiveChat from './pages/LiveChat'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -56,6 +61,11 @@ export default function App() {
                 <Route path="policies" element={<Policies />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="my-schedule" element={<MySchedule />} />
+                <Route path="directory" element={<Directory />} />
+                <Route path="documents" element={<Documents />} />
+                <Route path="onboarding" element={<Onboarding />} />
+                <Route path="time-off" element={<TimeOff />} />
+                <Route path="live-chat" element={<LiveChat />} />
               </Route>
             </Routes>
           </BrowserRouter>

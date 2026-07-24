@@ -1,3 +1,4 @@
+import html
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -56,7 +57,7 @@ def _send(to: str, subject: str, html: str, attachment_bytes: bytes = None, atta
         msg.attach(part)
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
             server.ehlo()
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
@@ -243,3 +244,22 @@ def send_signed_forms_receipt(*, to_email: str, patient_name: str, signed_forms:
     _send(to_email, subject, html,
           attachment_bytes=pdf_bytes if pdf_bytes else None,
           attachment_filename="lifeway_signed_forms.pdf" if pdf_bytes else None)
+
+
+def send_chat_escalation_email(*, to_email: str, visitor_name: str, visitor_email: str,
+                                message_preview: str, waiting_minutes: int):
+    # visitor_name/visitor_email/message_preview come directly from an anonymous
+    # website visitor — escape before embedding in raw HTML, unlike the other
+    # functions in this file whose inputs are staff/system-originated.
+    safe_name = html.escape(visitor_name)
+    safe_email = html.escape(visitor_email)
+    safe_preview = html.escape(message_preview)
+    subject = f"[Live Chat] Unanswered chat from {safe_name} ({waiting_minutes} min)"
+    body = f"""
+    <p style="font-size:16px;"><strong>{safe_name}</strong> ({safe_email}) started a live chat on the website and no staff member has responded yet.</p>
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:20px 0;">
+      <p style="margin:0;font-size:14px;white-space:pre-wrap;">{safe_preview}</p>
+    </div>
+    <p style="font-size:13px;color:#6b7280;">Log into the CRM's Live Chat inbox to respond.</p>"""
+    email_html = _header("Unanswered Live Chat", f"Waiting {waiting_minutes} minutes") + _wrap(body)
+    _send(to_email, subject, email_html)

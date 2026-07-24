@@ -1,6 +1,8 @@
 import html
+import hmac
 import os
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+import pytz
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -9,6 +11,7 @@ from pydantic import BaseModel
 import secrets
 import string
 import models
+import schemas
 from database import get_db
 from limiter import limiter
 from security_utils import safe_join
@@ -66,7 +69,7 @@ class BookingResponse(BaseModel):
 # ── Static services list ──────────────────────────────────────────────────────
 
 SERVICES = [
-    {"id": "mental_health", "label": "Mental Health", "description": "Therapy, counseling, and psychiatric support", "icon": "brain"},
+    {"id": "mental_health", "label": "Mental Health", "description": "Therapy and counseling support", "icon": "brain"},
     {"id": "medical", "label": "Medical Care", "description": "Primary care, wellness, and IV therapy", "icon": "heart-pulse"},
     {"id": "social", "label": "Social Services", "description": "Case management, housing, and resource support", "icon": "users"},
     {"id": "spiritual", "label": "Spiritual Support", "description": "Faith-based counseling and prayer", "icon": "sun"},
@@ -81,6 +84,27 @@ SERVICE_TO_ROLE = {
     "social": "social_worker",
     "wellness": "physician",
 }
+
+
+# ── Business hours (live chat) ─────────────────────────────────────────────────
+
+BUSINESS_TIMEZONE = pytz.timezone("America/New_York")
+BUSINESS_HOURS = {  # 0=Monday ... 6=Sunday; None = closed all day
+    0: (9, 17), 1: (9, 17), 2: (9, 17), 3: (9, 17), 4: (9, 17), 5: None, 6: None,
+}
+BUSINESS_HOURS_TEXT = {
+    "en": "Monday-Friday, 9am-5pm ET",
+    "es": "Lunes a Viernes, 9am-5pm hora del Este",
+}
+
+
+def _is_within_business_hours() -> bool:
+    now = datetime.now(BUSINESS_TIMEZONE)
+    hours = BUSINESS_HOURS.get(now.weekday())
+    if hours is None:
+        return False
+    start, end = hours
+    return start <= now.hour < end
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -775,3 +799,110 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         db.commit()
 
     return {"received": True}
+
+
+# ── Live Chat (visitor) ────────────────────────────────────────────────────────
+
+def _get_chat_session_or_404(db: Session, session_id: int) -> models.ChatSession:
+    session = db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    return session
+
+
+def _verify_visitor_token(session: models.ChatSession, provided: Optional[str]):
+    if not provided or not hmac.compare_digest(session.visitor_token, provided):
+        raise HTTPException(status_code=403, detail="Invalid chat session token")
+
+
+@router.get("/chat/hours")
+@limiter.limit("60/minute")
+def chat_hours(request: Request, lang: str = "en"):
+    hours_text = BUSINESS_HOURS_TEXT.get(lang, BUSINESS_HOURS_TEXT["en"])
+    return {"is_open": _is_within_business_hours(), "hours_text": hours_text}
+
+
+@router.post("/chat/sessions", response_model=schemas.ChatSessionStartOut, status_code=201)
+@limiter.limit("10/hour")
+def start_chat_session(
+    request: Request,
+    body: schemas.ChatSessionStart,
+    db: Session = Depends(get_db),
+):
+    session = models.ChatSession(
+        visitor_token=secrets.token_urlsafe(32),
+        visitor_name=body.visitor_name,
+        visitor_email=body.visitor_email,
+        status="waiting",
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return schemas.ChatSessionStartOut(
+        session_id=session.id,
+        visitor_token=session.visitor_token,
+        status=session.status,
+    )
+
+
+@router.get("/chat/sessions/{session_id}", response_model=schemas.ChatSessionOut)
+@limiter.limit("120/minute")
+def get_chat_session_status(
+    request: Request,
+    session_id: int,
+    x_chat_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    session = _get_chat_session_or_404(db, session_id)
+    _verify_visitor_token(session, x_chat_token)
+    out = schemas.ChatSessionOut.model_validate(session)
+    out.visitor_email = None  # not needed by the widget; keep the field staff-only
+    if session.assigned_staff:
+        out.assigned_staff_name = session.assigned_staff.first_name
+    return out
+
+
+@router.post("/chat/sessions/{session_id}/messages", response_model=schemas.ChatMessageOut, status_code=201)
+@limiter.limit("30/minute")
+def send_visitor_chat_message(
+    request: Request,
+    session_id: int,
+    body: schemas.ChatMessageCreate,
+    x_chat_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    session = _get_chat_session_or_404(db, session_id)
+    _verify_visitor_token(session, x_chat_token)
+    if session.status == "closed":
+        raise HTTPException(status_code=400, detail="This conversation has ended")
+
+    message = models.ChatMessage(
+        session_id=session.id,
+        sender_role="visitor",
+        sender_name=session.visitor_name,
+        content=body.content,
+    )
+    db.add(message)
+    session.last_message_at = datetime.utcnow()
+    db.commit()
+    db.refresh(message)
+    return message
+
+
+@router.get("/chat/sessions/{session_id}/messages", response_model=List[schemas.ChatMessageOut])
+@limiter.limit("120/minute")
+def poll_visitor_chat_messages(
+    request: Request,
+    session_id: int,
+    after_id: int = Query(0, ge=0, le=9223372036854775807),
+    x_chat_token: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    session = _get_chat_session_or_404(db, session_id)
+    _verify_visitor_token(session, x_chat_token)
+    return (
+        db.query(models.ChatMessage)
+        .filter(models.ChatMessage.session_id == session_id, models.ChatMessage.id > after_id)
+        .order_by(models.ChatMessage.id)
+        .all()
+    )

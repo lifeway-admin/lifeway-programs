@@ -91,11 +91,15 @@ class Staff(Base):
     # Per-therapist Google Calendar (optional; separate from org-wide token)
     google_refresh_token = Column(Text, nullable=True)
     google_calendar_id = Column(String(300), nullable=True)
+    manager_id = Column(Integer, ForeignKey("staff.id"), nullable=True)
+    pto_balance_hours = Column(Float, nullable=False, default=0.0)
 
     clients = relationship("Client", back_populates="assigned_staff")
     appointments = relationship("Appointment", back_populates="staff")
     assigned_tickets = relationship("Ticket", back_populates="assigned_to")
     availability = relationship("StaffAvailability", back_populates="staff", cascade="all, delete-orphan")
+    manager = relationship("Staff", remote_side=[id], backref="direct_reports")
+    time_off_requests = relationship("TimeOffRequest", back_populates="staff", cascade="all, delete-orphan")
 
 
 class Appointment(Base):
@@ -165,7 +169,7 @@ class Ticket(Base):
     ticket_number = Column(String(20), unique=True, index=True)
     title = Column(String(500), nullable=False)
     description = Column(Text)
-    type = Column(String(50))  # call, email, inquiry, complaint, follow_up, internal, walk_in
+    type = Column(String(50))  # call, email, inquiry, complaint, follow_up, internal, walk_in, chat
     status = Column(String(20), default="open")  # open, in_progress, resolved, closed
     priority = Column(String(20), default="medium")  # low, medium, high, urgent
     channel = Column(String(50))  # phone, email, walk_in, website, referral
@@ -243,3 +247,108 @@ class StaffAvailability(Base):
     end_hour = Column(Integer, nullable=False)     # exclusive: 9,17 means 9am-4pm last slot
 
     staff = relationship("Staff", back_populates="availability")
+
+
+class HRDocument(Base):
+    """Internal document library (handbook, SOPs, onboarding packets, HR forms) — admin-uploaded, staff-readable."""
+    __tablename__ = "hr_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(300), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(100), nullable=False)  # Handbook, SOP, Onboarding, HR Forms, Other
+    original_filename = Column(String(255), nullable=False)  # display only, never used as a disk path
+    stored_filename = Column(String(255), nullable=False, unique=True)  # uuid4().hex + ext
+    content_type = Column(String(150), nullable=True)
+    file_size_bytes = Column(Integer, nullable=False)
+    uploaded_by = Column(String(100), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class OnboardingChecklist(Base):
+    __tablename__ = "onboarding_checklists"
+
+    id = Column(Integer, primary_key=True, index=True)
+    staff_id = Column(Integer, ForeignKey("staff.id"), nullable=False)
+    notes = Column(Text, nullable=True)
+    created_by = Column(String(100))
+    created_at = Column(DateTime, server_default=func.now())
+
+    staff = relationship("Staff")
+    tasks = relationship(
+        "OnboardingTask",
+        back_populates="checklist",
+        cascade="all, delete-orphan",
+        order_by="OnboardingTask.sort_order",
+    )
+
+
+class OnboardingTask(Base):
+    __tablename__ = "onboarding_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    checklist_id = Column(Integer, ForeignKey("onboarding_checklists.id"), nullable=False)
+    label = Column(String(300), nullable=False)
+    sort_order = Column(Integer, default=0)
+    is_custom = Column(Boolean, default=False)
+    is_done = Column(Boolean, default=False)
+    completed_by = Column(String(100), nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    checklist = relationship("OnboardingChecklist", back_populates="tasks")
+
+
+class TimeOffRequest(Base):
+    __tablename__ = "time_off_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    staff_id = Column(Integer, ForeignKey("staff.id"), nullable=False)
+    request_type = Column(String(20), default="vacation")  # vacation, sick, personal, unpaid, bereavement
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    hours_requested = Column(Float, nullable=False)  # server-computed, never client-trusted
+    notes = Column(Text, nullable=True)
+    status = Column(String(20), default="pending")  # pending, approved, denied
+    reviewed_by = Column(String(100), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    admin_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    staff = relationship("Staff", back_populates="time_off_requests")
+
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    visitor_token = Column(String(64), unique=True, nullable=False, index=True)
+    visitor_name = Column(String(200), nullable=False)
+    visitor_email = Column(String(200), nullable=False)
+    status = Column(String(20), default="waiting")  # waiting, active, closed
+    assigned_staff_id = Column(Integer, ForeignKey("staff.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    last_message_at = Column(DateTime, server_default=func.now())
+    closed_at = Column(DateTime, nullable=True)
+    escalation_notified_at = Column(DateTime, nullable=True)
+
+    assigned_staff = relationship("Staff")
+    messages = relationship(
+        "ChatMessage",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        order_by="ChatMessage.id",
+    )
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=False)
+    sender_role = Column(String(20), nullable=False)  # visitor, staff, system
+    sender_name = Column(String(200), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    session = relationship("ChatSession", back_populates="messages")

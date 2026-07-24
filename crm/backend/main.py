@@ -13,7 +13,7 @@ from slowapi.errors import RateLimitExceeded
 import models, schemas
 from database import engine, get_db, Base
 from auth import authenticate_user, create_access_token, hash_password, get_current_user, require_admin, auth_router
-from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal, docs as docs_router
+from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal, docs as docs_router, hr_documents, onboarding, time_off, chat
 from routers.reports import router as reports_router
 from limiter import limiter
 from scheduler import scheduler
@@ -69,6 +69,19 @@ with engine.connect() as conn:
     if 'google_calendar_id' not in _cols:
         conn.execute(text("ALTER TABLE staff ADD COLUMN google_calendar_id VARCHAR(300)"))
         conn.commit()
+    if 'manager_id' not in _cols:
+        conn.execute(text("ALTER TABLE staff ADD COLUMN manager_id INTEGER REFERENCES staff(id)"))
+        conn.commit()
+    if 'pto_balance_hours' not in _cols:
+        conn.execute(text("ALTER TABLE staff ADD COLUMN pto_balance_hours FLOAT DEFAULT 0"))
+        conn.commit()
+
+# Migrate chat_sessions table — unclaimed-chat escalation tracking
+with engine.connect() as conn:
+    _cols = [c['name'] for c in sa_inspect(engine).get_columns('chat_sessions')]
+    if 'escalation_notified_at' not in _cols:
+        conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN escalation_notified_at DATETIME"))
+        conn.commit()
 
 app = FastAPI(title="Lifeway Programs CRM", version="1.0.0")
 
@@ -97,10 +110,10 @@ app.add_middleware(
     allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Chat-Token"],
 )
 
-_PHI_PATHS = ("/clients", "/appointments", "/staff", "/donations", "/tickets", "/public/patient", "/public/sign-forms")
+_PHI_PATHS = ("/clients", "/appointments", "/staff", "/donations", "/tickets", "/public/patient", "/public/sign-forms", "/onboarding", "/time-off", "/chat", "/public/chat")
 
 
 @app.middleware("http")
@@ -130,6 +143,10 @@ app.include_router(google_cal.router)
 app.include_router(reports_router)
 app.include_router(auth_router)
 app.include_router(docs_router.router)
+app.include_router(hr_documents.router)
+app.include_router(onboarding.router)
+app.include_router(time_off.router)
+app.include_router(chat.router)
 
 
 # ── Auth routes ───────────────────────────────────────────────────────────────

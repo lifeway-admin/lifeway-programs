@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List
 from datetime import date, datetime
 
@@ -45,6 +45,8 @@ class StaffBase(BaseModel):
     is_active: bool = True
     is_volunteer: bool = False
     bio: Optional[str] = None
+    manager_id: Optional[int] = None
+    pto_balance_hours: float = 0.0
 
 class StaffCreate(StaffBase):
     pass
@@ -60,6 +62,8 @@ class StaffUpdate(BaseModel):
     is_active: Optional[bool] = None
     is_volunteer: Optional[bool] = None
     bio: Optional[str] = None
+    manager_id: Optional[int] = None
+    pto_balance_hours: Optional[float] = None
 
 class StaffOut(StaffBase):
     id: int
@@ -285,3 +289,141 @@ class ActivityLogOut(BaseModel):
     created_at: datetime
     class Config:
         from_attributes = True
+
+
+# ── HR Documents ──────────────────────────────────────────────────────────────
+
+class HRDocumentUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+
+class HRDocumentOut(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    category: str
+    original_filename: str
+    content_type: Optional[str]
+    file_size_bytes: int
+    uploaded_by: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+
+# ── Onboarding ────────────────────────────────────────────────────────────────
+
+class OnboardingTaskCreate(BaseModel):
+    label: str
+
+class OnboardingTaskUpdate(BaseModel):
+    is_done: bool
+
+class OnboardingTaskOut(BaseModel):
+    id: int
+    checklist_id: int
+    label: str
+    sort_order: int
+    is_custom: bool
+    is_done: bool
+    completed_by: Optional[str] = None
+    completed_at: Optional[datetime] = None
+    class Config:
+        from_attributes = True
+
+class OnboardingChecklistCreate(BaseModel):
+    staff_id: int
+    notes: Optional[str] = None
+
+class OnboardingChecklistOut(BaseModel):
+    id: int
+    staff_id: int
+    notes: Optional[str]
+    created_by: str
+    created_at: datetime
+    tasks: List[OnboardingTaskOut] = []
+    staff_name: Optional[str] = None
+    percent_complete: float = 0.0
+    class Config:
+        from_attributes = True
+
+
+# ── Time Off ──────────────────────────────────────────────────────────────────
+
+class TimeOffCreate(BaseModel):
+    request_type: str = "vacation"
+    start_date: date
+    end_date: date
+    notes: Optional[str] = None
+
+class TimeOffReview(BaseModel):
+    admin_notes: Optional[str] = None
+
+class TimeOffOut(BaseModel):
+    id: int
+    staff_id: int
+    request_type: str
+    start_date: date
+    end_date: date
+    hours_requested: float
+    notes: Optional[str]
+    status: str
+    reviewed_by: Optional[str]
+    reviewed_at: Optional[datetime]
+    admin_notes: Optional[str]
+    created_at: datetime
+    updated_at: Optional[datetime]
+    staff_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class TimeOffMe(BaseModel):
+    balance_hours: float
+    requests: List[TimeOffOut]
+
+
+# ── Live Chat ─────────────────────────────────────────────────────────────────
+
+class ChatSessionStart(BaseModel):
+    visitor_name: str = Field(..., min_length=1, max_length=200)
+    visitor_email: str = Field(..., min_length=1, max_length=200)
+
+    @field_validator("visitor_name", "visitor_email")
+    @classmethod
+    def strip_control_chars(cls, v):
+        # A newline here would survive html.escape() and break the escalation
+        # email's Header encoding later — strip at the source instead.
+        cleaned = v.replace("\r", "").replace("\n", "").strip()
+        if not cleaned:
+            raise ValueError("must not be empty or only whitespace/control characters")
+        return cleaned
+
+class ChatMessageCreate(BaseModel):
+    content: str = Field(..., min_length=1, max_length=5000)
+
+class ChatMessageOut(BaseModel):
+    id: int
+    sender_role: str
+    sender_name: str
+    content: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class ChatSessionOut(BaseModel):
+    id: int
+    visitor_name: str
+    visitor_email: Optional[str] = None
+    status: str
+    created_at: datetime
+    last_message_at: datetime
+    closed_at: Optional[datetime] = None
+    assigned_staff_name: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class ChatSessionStartOut(BaseModel):
+    session_id: int
+    visitor_token: str
+    status: str

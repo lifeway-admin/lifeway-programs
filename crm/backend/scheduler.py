@@ -1,5 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 scheduler = BackgroundScheduler(timezone="America/New_York")
 
@@ -73,4 +74,104 @@ def check_reminders():
         db.close()
 
 
+def close_abandoned_chats():
+    """Close chat sessions with no activity for 30+ minutes. Runs every 5 minutes."""
+    from database import SessionLocal
+    import models
+    from datetime import datetime, timedelta
+
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(minutes=30)
+        stale_ids = [
+            row.id
+            for row in db.query(models.ChatSession.id).filter(
+                models.ChatSession.status.in_(["waiting", "active"]),
+                models.ChatSession.last_message_at < cutoff,
+            )
+        ]
+
+        # Atomic conditional close per session: only a session this call actually
+        # transitions to closed gets a summary ticket, so a manual close racing
+        # with this job can't produce a duplicate ticket for the same conversation.
+        closed_sessions = []
+        for session_id in stale_ids:
+            updated = (
+                db.query(models.ChatSession)
+                .filter(models.ChatSession.id == session_id, models.ChatSession.status.in_(["waiting", "active"]))
+                .update({"status": "closed", "closed_at": datetime.utcnow()})
+            )
+            db.commit()
+            if updated:
+                closed_sessions.append(db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first())
+
+        if closed_sessions:
+            from routers.chat import _make_summary_ticket
+            for session in closed_sessions:
+                try:
+                    _make_summary_ticket(db, session)
+                except Exception:
+                    pass
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
+ESCALATION_THRESHOLD_MINUTES = 5
+
+
+def notify_unclaimed_chats():
+    """Email staff about chats that have sat unclaimed too long. Runs every 2 minutes."""
+    from database import SessionLocal
+    import models
+    import os
+    from datetime import datetime, timedelta
+
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(minutes=ESCALATION_THRESHOLD_MINUTES)
+        stale = (
+            db.query(models.ChatSession)
+            .filter(
+                models.ChatSession.status == "waiting",
+                models.ChatSession.created_at < cutoff,
+                models.ChatSession.escalation_notified_at.is_(None),
+            )
+            .limit(50)
+            .all()
+        )
+        staff_inbox = os.getenv("SMTP_FROM_EMAIL", "")
+        for session in stale:
+            # Mark and commit per-session (not once after the loop): if a later
+            # session in the batch fails, earlier successful marks/sends must
+            # survive rather than rolling back into a resend storm next tick.
+            try:
+                session.escalation_notified_at = datetime.utcnow()
+                if staff_inbox:
+                    first_message = (
+                        db.query(models.ChatMessage)
+                        .filter(models.ChatMessage.session_id == session.id)
+                        .order_by(models.ChatMessage.id)
+                        .first()
+                    )
+                    from email_service import send_chat_escalation_email
+                    send_chat_escalation_email(
+                        to_email=staff_inbox,
+                        visitor_name=session.visitor_name,
+                        visitor_email=session.visitor_email,
+                        message_preview=(first_message.content if first_message else "(no message yet)"),
+                        waiting_minutes=ESCALATION_THRESHOLD_MINUTES,
+                    )
+                db.commit()
+            except Exception:
+                db.rollback()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
 scheduler.add_job(check_reminders, CronTrigger(hour=8, minute=0))
+scheduler.add_job(close_abandoned_chats, IntervalTrigger(minutes=5))
+scheduler.add_job(notify_unclaimed_chats, IntervalTrigger(minutes=2))
