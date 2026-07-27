@@ -415,8 +415,9 @@ class TimeOffMe(BaseModel):
 class ChatSessionStart(BaseModel):
     visitor_name: str = Field(..., min_length=1, max_length=200)
     visitor_email: str = Field(..., min_length=1, max_length=200)
+    visitor_phone: str = Field(..., min_length=1, max_length=30)
 
-    @field_validator("visitor_name", "visitor_email")
+    @field_validator("visitor_name", "visitor_email", "visitor_phone")
     @classmethod
     def strip_control_chars(cls, v):
         # A newline here would survive html.escape() and break the escalation
@@ -442,6 +443,7 @@ class ChatSessionOut(BaseModel):
     id: int
     visitor_name: str
     visitor_email: Optional[str] = None
+    visitor_phone: Optional[str] = None
     status: str
     created_at: datetime
     last_message_at: datetime

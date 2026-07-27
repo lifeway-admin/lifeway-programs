@@ -15,10 +15,10 @@ export default function ChatWidget() {
   const [phase, setPhase] = useState('intake') // intake | chatting
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [sessionId, setSessionId] = useState(null)
   const [visitorToken, setVisitorToken] = useState(null)
   const [status, setStatus] = useState('waiting')
-  const [staffName, setStaffName] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [starting, setStarting] = useState(false)
@@ -64,7 +64,6 @@ export default function ChatWidget() {
         if (statusRes.ok && !cancelled) {
           const data = await statusRes.json()
           setStatus(data.status)
-          setStaffName(data.assigned_staff_name)
           setStillWaiting(
             data.status === 'waiting' && !!chatStartedAt && (Date.now() - chatStartedAt) > STILL_WAITING_THRESHOLD_MS
           )
@@ -91,7 +90,8 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const canStart = name.trim().length > 0 && EMAIL_RE.test(email)
+  const phoneDigitCount = (phone.match(/\d/g) || []).length
+  const canStart = name.trim().length > 0 && EMAIL_RE.test(email) && phoneDigitCount >= 7
 
   async function startChat(e) {
     e.preventDefault()
@@ -102,7 +102,7 @@ export default function ChatWidget() {
       const res = await fetch(`${API}/public/chat/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visitor_name: name.trim(), visitor_email: email.trim() }),
+        body: JSON.stringify({ visitor_name: name.trim(), visitor_email: email.trim(), visitor_phone: phone.trim() }),
       })
       if (!res.ok) {
         setError(t.errorGeneric)
@@ -150,7 +150,7 @@ export default function ChatWidget() {
     }
   }
 
-  const statusLine = status === 'closed' ? t.ended : (status === 'active' && staffName) ? `${t.chattingWith} ${staffName}` : t.waiting
+  const statusLine = status === 'closed' ? t.ended : (status === 'active') ? `${t.chattingWith} Lifeway Support` : t.waiting
 
   return (
     <div className="fixed bottom-24 right-5 md:bottom-5 z-40">
@@ -199,6 +199,14 @@ export default function ChatWidget() {
                 onChange={e => setEmail(e.target.value)}
                 maxLength={200}
               />
+              <input
+                className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lw-pink"
+                type="tel"
+                placeholder={t.phonePlaceholder}
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                maxLength={30}
+              />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button
                 type="submit"
@@ -219,7 +227,10 @@ export default function ChatWidget() {
               )}
               <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
                 {messages.map(m => (
-                  <div key={m.id} className={`flex ${m.sender_role === 'visitor' ? 'justify-end' : 'justify-start'}`}>
+                  <div key={m.id} className={`flex flex-col ${m.sender_role === 'visitor' ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[10px] text-gray-400 mb-0.5 px-1">
+                      {m.sender_role === 'visitor' ? m.sender_name : 'Lifeway Support'}
+                    </span>
                     <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm leading-snug ${m.sender_role === 'visitor' ? 'bg-lw-pink text-white' : 'bg-gray-100 text-gray-800'}`}>
                       {m.content}
                     </div>

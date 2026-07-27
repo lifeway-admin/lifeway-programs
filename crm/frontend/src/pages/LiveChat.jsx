@@ -6,6 +6,15 @@ import { useToast } from '../context/ToastContext'
 
 const STATUS_TABS = ['waiting', 'active', 'closed']
 
+// Backend sends naive UTC timestamps (no "Z"/offset suffix) — without this,
+// `new Date(...)` reads them as local time and throws the result off by
+// however many hours the browser's timezone is offset from UTC.
+function parseUTC(isoString) {
+  if (!isoString) return null
+  const hasZone = /Z$|[+-]\d{2}:\d{2}$/.test(isoString)
+  return new Date(hasZone ? isoString : `${isoString}Z`)
+}
+
 const STATUS_COLORS = {
   waiting: 'bg-yellow-100 text-yellow-700',
   active: 'bg-green-100 text-green-700',
@@ -45,7 +54,7 @@ function SessionList({ sessions, selectedId, onSelect, statusTab, setStatusTab }
               <span className={`badge ${STATUS_COLORS[s.status]} flex-shrink-0`}>{s.status}</span>
             </div>
             <p className="text-xs text-gray-400">
-              {s.assigned_staff_name ? `with ${s.assigned_staff_name}` : 'unclaimed'} · {formatDistanceToNow(new Date(s.last_message_at), { addSuffix: true })}
+              {s.assigned_staff_name ? `with ${s.assigned_staff_name}` : 'unclaimed'} · {formatDistanceToNow(parseUTC(s.last_message_at), { addSuffix: true })}
             </p>
           </button>
         ))}
@@ -151,7 +160,7 @@ function ChatThread({ sessionId, onChanged, toast }) {
       <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
         <div>
           <p className="font-semibold text-gray-900 dark:text-white">{session.visitor_name}</p>
-          <p className="text-xs text-gray-400">{session.visitor_email}</p>
+          <p className="text-xs text-gray-400">{session.visitor_email}{session.visitor_phone ? ` · ${session.visitor_phone}` : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           {!session.assigned_staff_name && session.status !== 'closed' && (

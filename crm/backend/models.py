@@ -327,6 +327,7 @@ class ChatSession(Base):
     visitor_token = Column(String(64), unique=True, nullable=False, index=True)
     visitor_name = Column(String(200), nullable=False)
     visitor_email = Column(String(200), nullable=False)
+    visitor_phone = Column(String(30), nullable=True)
     status = Column(String(20), default="waiting")  # waiting, active, closed
     assigned_staff_id = Column(Integer, ForeignKey("staff.id"), nullable=True)
     created_at = Column(DateTime, server_default=func.now())

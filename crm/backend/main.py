@@ -83,6 +83,13 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN escalation_notified_at DATETIME"))
         conn.commit()
 
+# Migrate chat_sessions table — visitor phone number
+with engine.connect() as conn:
+    _cols = [c['name'] for c in sa_inspect(engine).get_columns('chat_sessions')]
+    if 'visitor_phone' not in _cols:
+        conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN visitor_phone VARCHAR(30)"))
+        conn.commit()
+
 # Migrate users table — login lockout tracking
 with engine.connect() as conn:
     _cols = [c['name'] for c in sa_inspect(engine).get_columns('users')]

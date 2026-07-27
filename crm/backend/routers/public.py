@@ -833,6 +833,7 @@ def start_chat_session(
         visitor_token=secrets.token_urlsafe(32),
         visitor_name=body.visitor_name,
         visitor_email=body.visitor_email,
+        visitor_phone=body.visitor_phone,
         status="waiting",
     )
     db.add(session)
@@ -857,6 +858,7 @@ def get_chat_session_status(
     _verify_visitor_token(session, x_chat_token)
     out = schemas.ChatSessionOut.model_validate(session)
     out.visitor_email = None  # not needed by the widget; keep the field staff-only
+    out.visitor_phone = None  # not needed by the widget; keep the field staff-only
     if session.assigned_staff:
         out.assigned_staff_name = session.assigned_staff.first_name
     return out
