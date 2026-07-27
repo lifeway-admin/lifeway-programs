@@ -12,7 +12,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 import models, schemas
 from database import engine, get_db, Base
-from auth import authenticate_user, create_access_token, hash_password, get_current_user, require_admin, auth_router
+from auth import verify_password, create_access_token, hash_password, get_current_user, require_admin, auth_router
 from routers import clients, staff, appointments, donations, ai, tickets, activity, public as public_router, google_cal, docs as docs_router, hr_documents, onboarding, time_off, chat
 from routers.reports import router as reports_router
 from limiter import limiter
@@ -83,6 +83,16 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN escalation_notified_at DATETIME"))
         conn.commit()
 
+# Migrate users table — login lockout tracking
+with engine.connect() as conn:
+    _cols = [c['name'] for c in sa_inspect(engine).get_columns('users')]
+    if 'failed_login_attempts' not in _cols:
+        conn.execute(text("ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0"))
+        conn.commit()
+    if 'locked_until' not in _cols:
+        conn.execute(text("ALTER TABLE users ADD COLUMN locked_until DATETIME"))
+        conn.commit()
+
 app = FastAPI(title="Lifeway Programs CRM", version="1.0.0")
 
 
@@ -151,12 +161,35 @@ app.include_router(chat.router)
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
 
+LOGIN_LOCKOUT_THRESHOLD = 3
+LOGIN_LOCKOUT_MINUTES = 15
+
+
 @app.post("/auth/login", response_model=schemas.Token)
 @limiter.limit("10/minute")
 def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+
+    if user and user.locked_until and user.locked_until > datetime.utcnow():
+        minutes_left = max(1, int((user.locked_until - datetime.utcnow()).total_seconds() // 60) + 1)
+        raise HTTPException(
+            status_code=403,
+            detail=f"Account locked due to too many failed login attempts. Try again in {minutes_left} minute(s).",
+        )
+
+    if not user or not user.is_active or not verify_password(form_data.password, user.hashed_password):
+        if user:
+            user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+            if user.failed_login_attempts >= LOGIN_LOCKOUT_THRESHOLD:
+                user.locked_until = datetime.utcnow() + timedelta(minutes=LOGIN_LOCKOUT_MINUTES)
+                user.failed_login_attempts = 0
+            db.commit()
         raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    user.failed_login_attempts = 0
+    user.locked_until = None
+    db.commit()
+
     token = create_access_token({"sub": user.username})
     return {"access_token": token, "token_type": "bearer", "role": user.role}
 
