@@ -72,6 +72,17 @@ class StaffOut(StaffBase):
         from_attributes = True
 
 
+class StaffInviteOut(BaseModel):
+    id: int
+    email: str
+    role: str
+    invited_by: str
+    status: str  # "pending", "accepted", or "expired"
+    expires_at: datetime
+    accepted_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+
 # ── Client ────────────────────────────────────────────────────────────────────
 
 class ClientBase(BaseModel):

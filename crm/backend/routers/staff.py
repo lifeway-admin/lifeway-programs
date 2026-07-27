@@ -76,6 +76,60 @@ def list_staff(
     return q.all()
 
 
+@router.get("/invites", response_model=List[schemas.StaffInviteOut])
+def list_invites(db: Session = Depends(get_db), _=Depends(require_admin)):
+    invites = db.query(models.StaffInvite).order_by(models.StaffInvite.created_at.desc()).all()
+    now = datetime.now()
+    result = []
+    for inv in invites:
+        if inv.accepted_at:
+            invite_status = "accepted"
+        elif inv.expires_at < now:
+            invite_status = "expired"
+        else:
+            invite_status = "pending"
+        result.append(schemas.StaffInviteOut(
+            id=inv.id,
+            email=inv.email,
+            role=inv.role,
+            invited_by=inv.invited_by,
+            status=invite_status,
+            expires_at=inv.expires_at,
+            accepted_at=inv.accepted_at,
+            created_at=inv.created_at,
+        ))
+    return result
+
+
+@router.post("/invites/{invite_id}/resend")
+@limiter.limit("20/hour")
+def resend_invite(request: Request, invite_id: int, db: Session = Depends(get_db), current_user=Depends(require_admin)):
+    invite = db.query(models.StaffInvite).filter(models.StaffInvite.id == invite_id).first()
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    if invite.accepted_at:
+        raise HTTPException(status_code=400, detail="This invite has already been accepted")
+
+    invite.token = secrets.token_urlsafe(32)
+    invite.expires_at = datetime.now() + timedelta(hours=48)
+    invite.invited_by = current_user.full_name or current_user.username
+    db.commit()
+
+    invite_url = f"{_CRM_BASE_URL}/accept-invite/{invite.token}"
+    try:
+        from email_service import send_staff_invite
+        send_staff_invite(
+            to_email=invite.email,
+            invited_by=invite.invited_by,
+            role=invite.role,
+            invite_url=invite_url,
+        )
+    except Exception:
+        pass
+
+    return {"success": True, "invite_url": invite_url, "expires_at": invite.expires_at.isoformat()}
+
+
 @router.post("/", response_model=schemas.StaffOut, status_code=201)
 def create_staff(staff: schemas.StaffCreate, db: Session = Depends(get_db), _=Depends(require_admin)):
     db_staff = models.Staff(**staff.model_dump())

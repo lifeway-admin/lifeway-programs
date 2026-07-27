@@ -172,6 +172,49 @@ function InviteModal({ onClose, toast }) {
 }
 
 
+const INVITE_STATUS_STYLES = {
+  pending: 'bg-yellow-100 text-yellow-700',
+  accepted: 'bg-green-100 text-green-700',
+  expired: 'bg-gray-100 text-gray-500',
+}
+
+function InvitesPanel({ invites, onResend, resendingId }) {
+  if (invites.length === 0) return null
+
+  return (
+    <div className="card mb-6">
+      <h2 className="font-semibold text-gray-900 mb-3">Staff Invitations</h2>
+      <div className="divide-y divide-gray-100">
+        {invites.map(inv => (
+          <div key={inv.id} className="flex items-center justify-between py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-800">{inv.email}</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {inv.role.replace('_', ' ')} · invited by {inv.invited_by}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`badge ${INVITE_STATUS_STYLES[inv.status] || 'bg-gray-100 text-gray-600'}`}>
+                {inv.status}
+              </span>
+              {inv.status !== 'accepted' && (
+                <button
+                  onClick={() => onResend(inv.id)}
+                  disabled={resendingId === inv.id}
+                  className="text-lifeway-pink hover:underline text-xs disabled:opacity-50"
+                >
+                  {resendingId === inv.id ? 'Resending…' : 'Resend'}
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
 function AvailabilityModal({ staff, onClose, toast }) {
   // slots[dayIndex] = { enabled, startHour, endHour }
   const [slots, setSlots] = useState(
@@ -288,6 +331,8 @@ export default function Staff() {
   const [editing, setEditing] = useState(null)
   const [showInvite, setShowInvite] = useState(false)
   const [availFor, setAvailFor] = useState(null)
+  const [invites, setInvites] = useState([])
+  const [resendingId, setResendingId] = useState(null)
 
   async function load() {
     const params = { active_only: true }
@@ -297,7 +342,26 @@ export default function Staff() {
     setStaff(data)
   }
 
+  async function loadInvites() {
+    const { data } = await api.get('/staff/invites')
+    setInvites(data)
+  }
+
   useEffect(() => { load() }, [roleFilter, volunteersOnly])
+  useEffect(() => { loadInvites() }, [])
+
+  async function resendInvite(id) {
+    setResendingId(id)
+    try {
+      await api.post(`/staff/invites/${id}/resend`)
+      toast('Invitation resent.', 'success')
+      loadInvites()
+    } catch (err) {
+      toast(err.response?.data?.detail || 'Failed to resend invite.', 'error')
+    } finally {
+      setResendingId(null)
+    }
+  }
 
   return (
     <div className="p-8">
@@ -332,6 +396,8 @@ export default function Staff() {
         </label>
       </div>
 
+      <InvitesPanel invites={invites} onResend={resendInvite} resendingId={resendingId} />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {staff.length === 0 && <p className="text-gray-400 col-span-3 py-12 text-center">No staff members found.</p>}
         {staff.map(s => (
@@ -355,7 +421,7 @@ export default function Staff() {
       </div>
 
       {showForm && <StaffForm initial={editing} allStaff={staff} onSave={() => { setShowForm(false); load() }} onClose={() => setShowForm(false)} toast={toast} />}
-      {showInvite && <InviteModal onClose={() => setShowInvite(false)} toast={toast} />}
+      {showInvite && <InviteModal onClose={() => { setShowInvite(false); loadInvites() }} toast={toast} />}
       {availFor && <AvailabilityModal staff={availFor} onClose={() => setAvailFor(null)} toast={toast} />}
     </div>
   )
