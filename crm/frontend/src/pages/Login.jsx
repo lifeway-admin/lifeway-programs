@@ -53,7 +53,22 @@ export default function Login() {
           <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
+          <p className="text-center text-sm text-gray-500">
+            Forgot your username or password?{' '}
+            <a href="mailto:it@lifewayprograms.org" className="text-lifeway-pink hover:underline">
+              Contact your administrator
+            </a>
+          </p>
         </form>
+
+        <p className="text-center mt-6">
+          <a
+            href={import.meta.env.VITE_MARKETING_URL || 'http://localhost:5175'}
+            className="text-sm text-gray-500 hover:text-lifeway-pink transition-colors"
+          >
+            ← Back to lifewayprograms.org
+          </a>
+        </p>
       </div>
     </div>
   )
