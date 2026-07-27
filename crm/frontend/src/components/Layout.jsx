@@ -76,6 +76,12 @@ export default function Layout() {
   const [waitingChatCount, setWaitingChatCount] = useState(0)
   const prevWaitingCountRef = useRef(0)
   const primedRef = useRef(false)
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(id)
+  }, [])
   useKeyboardShortcuts({ onSearchOpen: () => setShowSearch(true), onHelpOpen: () => setShowHelp(true), navigate })
 
   useEffect(() => {
@@ -229,7 +235,9 @@ export default function Layout() {
             <kbd className="ml-auto text-xs bg-gray-200 dark:bg-gray-600 rounded px-1.5 py-0.5">/</kbd>
           </button>
           <div className="text-xs text-gray-400">
-            {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            {now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            {' · '}
+            {now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
           </div>
         </div>
 
